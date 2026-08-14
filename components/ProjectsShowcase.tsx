@@ -24,7 +24,7 @@ function FeaturedBlock({ project, index }: { project: ProjectCaseStudy; index: n
       className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center py-14 sm:py-16 border-b border-line last:border-b-0"
     >
       <div className={imageFirst ? "lg:order-1" : "lg:order-2"}>
-        <DashboardPreview title={project.shortTitle} accent={project.accent} />
+        <DashboardPreview title={project.shortTitle} accent={project.accent} images={project.images} />
       </div>
 
       <div className={imageFirst ? "lg:order-2" : "lg:order-1"}>
@@ -70,7 +70,7 @@ export function ProjectsShowcase() {
   const compact = projects.filter((p) => !p.featured);
 
   return (
-    <section id="work" className="relative py-28 sm:py-36 border-t border-line">
+    <section id="work" className="relative pt-16 sm:pt-20 pb-28 sm:pb-36 border-t border-line">
       <div className="max-w-[1320px] mx-auto px-6 sm:px-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -81,7 +81,7 @@ export function ProjectsShowcase() {
         >
           <span className="eyebrow !text-faint">Projects</span>
           <h2 className="font-semibold text-3xl sm:text-4xl leading-tight tracking-tight text-bone mt-3">
-            Selected work.
+            Live projects.
           </h2>
         </motion.div>
 

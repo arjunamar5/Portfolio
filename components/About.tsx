@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { PORTFOLIO_DATA } from "@/data/portfolio-data";
+import { ParticleField } from "./ParticleField";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -12,8 +13,10 @@ export function About() {
   const { bioLong, education } = PORTFOLIO_DATA.personal;
 
   return (
-    <section id="about" className="relative py-28 sm:py-36 border-t border-line">
-      <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
+    <section id="about" className="relative pt-28 sm:pt-36 pb-16 sm:pb-20 border-t border-line overflow-hidden">
+      <ParticleField className="absolute inset-0 pointer-events-none opacity-55 [mask-image:radial-gradient(ellipse_60%_75%_at_50%_50%,black,transparent_92%)]" />
+
+      <div className="relative z-10 max-w-[1100px] mx-auto px-6 sm:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
           <motion.div
             initial={{ opacity: 0, y: 16 }}

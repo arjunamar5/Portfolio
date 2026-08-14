@@ -11,7 +11,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Arjun R Amarnath — Full-Stack Developer",
+  title: "Arjun R Amarnath",
   description:
     "Portfolio of Arjun R Amarnath — a final-year Computer Science student building full-stack products, applied AI systems, and cloud-native infrastructure.",
   keywords: [

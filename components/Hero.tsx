@@ -54,8 +54,8 @@ function CodeCard() {
             <span className="text-accent-soft">const</span> <span className="text-bone">developer</span> = {"{"}
             {"\n"}
             {"  "}name: <span className="text-emerald-300">&apos;{PORTFOLIO_DATA.personal.name}&apos;</span>,{"\n"}
-            {"  "}focus: [<span className="text-emerald-300">&apos;Full-Stack&apos;</span>, <span className="text-emerald-300">&apos;Applied AI&apos;</span>, <span className="text-emerald-300">&apos;Cloud&apos;</span>],{"\n"}
-            {"  "}status: <span className="text-emerald-300">&apos;Final-Year CS Student&apos;</span>,{"\n"}
+            {"  "}focus: [<span className="text-emerald-300">&apos;Full-Stack&apos;</span>, <span className="text-emerald-300">&apos;AI&apos;</span>, <span className="text-emerald-300">&apos;Cloud&apos;</span>],{"\n"}
+            {"  "}interest: <span className="text-emerald-300">&apos;Exploring new Tech&apos;</span>,{"\n"}
             {"  "}learning: <span className="text-neon">true</span>,{"\n"}
             {"}"};
           </code>
@@ -91,16 +91,6 @@ export function Hero({ onOpenResume }: { onOpenResume: () => void }) {
       <div className="relative max-w-[1280px] w-full mx-auto px-6 sm:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass mb-8"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-xs text-dim">Open to full-time & freelance opportunities</span>
-            </motion.div>
-
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

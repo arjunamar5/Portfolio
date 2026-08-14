@@ -43,6 +43,8 @@ export interface ProjectCaseStudy {
   keyLearnings: string[];
   /** Featured projects get the large alternating showcase layout; others get the compact card grid. */
   featured?: boolean;
+  /** Real product screenshots, in /public. Falls back to an abstract mockup when omitted. */
+  images?: string[];
 }
 
 export interface TechEntry {
@@ -69,11 +71,9 @@ export const PORTFOLIO_DATA = {
     email: "arjunamarnath1008@gmail.com",
     linkedin: "https://linkedin.com/in/arjun-r-amarnath",
     bioShort: "Final-year CS student building full-stack products, applied AI, and cloud-native systems.",
-    bioLong: `I'm a final-year Computer Science student with a strong foundation in coding, testing, and full-stack software development. I enjoy exploring different corners of technology — from building complete web applications to experimenting with cloud infrastructure and IoT.
+    bioLong: `I'm a Computer Science graduate and software developer who enjoys turning ideas into practical, real-world applications. I work across full-stack development, AI, cloud technologies, and software engineering, with experience building and deploying applications for real users.
 
-My academic work centers on applied AI, including a multimodal system for brain tumor detection using CNNs, EfficientNet, YOLO, and U-Net, paired with Grad-CAM explainability and a local RAG assistant. I've also deployed a cloud-hosted event platform on AWS, and taken on short full-stack engagements building booking and management platforms for two local businesses.
-
-I currently serve as President of the Computer Society of India (ASEB chapter) at my university.`,
+I'm particularly interested in exploring how different technologies come together to solve meaningful problems, from scalable web platforms and cloud infrastructure to AI-powered systems. Beyond development, I've also taken on leadership roles, including serving as President of the Computer Society of India (ASEB Chapter) at my university.`,
     education: {
       institution: "Amrita Vishwa Vidyapeetham",
       degree: "B.Tech in Computer Science and Engineering",
@@ -261,8 +261,8 @@ I currently serve as President of the Computer Society of India (ASEB chapter) a
       title: "Perfect Study Space - Multi-Tenant SaaS Platform",
       shortTitle: "Perfect Study Space",
       category: "Multi-Tenant SaaS Platform",
-      tagline: "Scalable study center management platform with multi-branch isolation, membership automated renewal, CRM, and AI study assistant.",
-      description: "A commercial SaaS platform built for educational hubs and coworking study centers. Features multi-tenant branch management, instant RFID/QR member attendance, automated subscription billing, staff duty management, and an embedded AI concierge.",
+      tagline: "Multi-branch study center platform managing registration, memberships, attendance, and seat allocation — with role-based analytics and a staff CRM for lead tracking.",
+      description: "A commercial SaaS platform built for educational hubs and coworking study centers. Handles student registration, memberships, attendance, seat allocation, walk-ins, trial sessions, waitlists, fees, and notifications, with role-based access and real-time branch analytics for staff and owners. Website enquiries are automatically captured into a staff CRM dashboard for lead tracking and follow-up.",
       confidentialityTag: "Private Client Project",
       problemStatement: "Multi-branch study facilities struggled with fragmented paper logbooks, manual membership billing reconciliation, high member churn, and lack of real-time seat occupancy insights across locations.",
       objectives: [
@@ -273,15 +273,15 @@ I currently serve as President of the Computer Society of India (ASEB chapter) a
       ],
       architectureOverview: "Client App (Next.js) -> API Gateway -> Node.js Express Microservices -> Tenant Middleware -> MongoDB Cluster (Branch Collections) + Supabase Auth & Realtime.",
       techStack: [
-        { category: "Frontend", items: ["Next.js", "React.js", "TypeScript", "Tailwind CSS", "Framer Motion"] },
-        { category: "Backend", items: ["Node.js", "Express.js", "MongoDB", "Supabase", "WebSockets"] },
+        { category: "Frontend", items: ["Next.js", "React.js", "TypeScript", "Tailwind CSS"] },
+        { category: "Backend", items: ["Supabase", "WebSockets"] },
         { category: "Integrations", items: ["WhatsApp Cloud API", "Razorpay / Stripe", "Chart.js"] }
       ],
       keyFeatures: [
         { title: "Multi-Branch Switcher", description: "Centralized administration with instant branch switching and isolated tenant reporting." },
-        { title: "Live Attendance & Seat Map", description: "Real-time visual map of vacant vs occupied study desks across branches." },
-        { title: "Automated Membership Renewal", description: "Automated SMS/WhatsApp payment link generation prior to subscription expiry." },
-        { title: "AI Administrative Assistant", description: "Embedded chatbot answering member FAQs, desk availability, and center policies." }
+        { title: "Membership Control", description: "Manage plans, renewals, and payment status for every member with automated WhatsApp/SMS reminders." },
+        { title: "CRM", description: "Centralized customer relationship management across every branch, from enquiry to conversion." },
+        { title: "Lead Management", description: "Website enquiries are captured automatically and routed to staff for follow-up and conversion tracking." }
       ],
       developmentJourney: "Built from scratch to support multi-branch expansion. Designed custom tenant resolution middleware that automatically scopes DB queries by Tenant ID, guaranteeing zero cross-branch data leaks while sharing unified infrastructure.",
       challengesAndSolutions: [
@@ -306,7 +306,8 @@ I currently serve as President of the Computer Society of India (ASEB chapter) a
         "Multi-tenancy is mostly a data-modeling and middleware problem, not an infrastructure one — shared infrastructure with strict scoping was simpler to operate than isolated databases per branch.",
         "Automated reminders only help retention if they're timed and channel-matched to how members actually respond — WhatsApp outperformed email here."
       ],
-      featured: true
+      featured: true,
+      images: ["/projects/perfect-study-space-1.png", "/projects/perfect-study-space-2.png"]
     },
 
     {
@@ -314,8 +315,8 @@ I currently serve as President of the Computer Society of India (ASEB chapter) a
       title: "CueCourtOS - Enterprise Sports Facility Platform",
       shortTitle: "CueCourtOS",
       category: "Enterprise Sports Venue Management",
-      tagline: "Full-stack sports venue & cafe platform automating court bookings, food ordering POS, membership tabs, and WhatsApp AI bot.",
-      description: "An end-to-end venue management system designed for sports complexes featuring court reservations, integrated cafe ordering, player membership accounts, real-time revenue analytics, and an interactive WhatsApp AI assistant.",
+      tagline: "Full-stack sports venue platform automating court bookings, food ordering, billing, and memberships — with CueBot, an AI assistant delivering live business analytics.",
+      description: "An end-to-end venue management system for sports complexes handling customer registration, court bookings, food ordering, billing, and memberships. Customers book courts directly through WhatsApp with automated confirmations and bill notifications, while CueBot — an AI-powered assistant — gives staff live insights into revenue, bookings, sports performance, food sales, customers, and memberships.",
       confidentialityTag: "Private Client Project",
       problemStatement: "Sports complexes suffer revenue loss due to double-booked courts, disconnected cafe operations, slow manual court tab settlements, and phone-based booking friction.",
       objectives: [
@@ -326,13 +327,13 @@ I currently serve as President of the Computer Society of India (ASEB chapter) a
       ],
       architectureOverview: "Customer Mobile Web / WhatsApp -> Webhook Ingress -> Node.js Booking Engine -> PostgreSQL Transactional Engine -> Cafe POS Terminal -> Real-Time WebSocket Board.",
       techStack: [
-        { category: "Full Stack", items: ["React.js", "Node.js", "Express.js", "PostgreSQL", "Tailwind CSS"] },
-        { category: "AI & Messaging", items: ["WhatsApp Cloud API", "OpenAI / NLP Intent Engine", "WebSockets"] }
+        { category: "Full Stack", items: ["React.js", "PostgreSQL", "Tailwind CSS"] },
+        { category: "AI & Messaging", items: ["WhatsApp Cloud API", "AI Chatbot"] }
       ],
       keyFeatures: [
         { title: "Court Booking Matrix", description: "Interactive timeline grid for court slot selection, lighting controls, and equipment rentals." },
-        { title: "Integrated Cafe POS", description: "Allows players to order food & drinks directly to their court tab during matches." },
-        { title: "CueBot AI WhatsApp Assistant", description: "Customers can text 'Book Court 2 tomorrow 6pm' and receive an instant booking confirmation." },
+        { title: "Integrated Food Ordering & Billing", description: "Players order food & drinks straight to their court tab, billed automatically at checkout." },
+        { title: "CueBot — AI Business Analyst", description: "An AI-powered assistant giving staff live insights on revenue, bookings, sports performance, food sales, customers, and memberships." },
         { title: "Revenue & Peak Analytics", description: "Deep visual analytics highlighting peak play hours, court utilization %, and cafe sales." }
       ],
       developmentJourney: "Collaborated directly with facility managers to identify operational bottlenecks. Built a fast, low-latency POS interface for cafe staff synchronized with the main court reservation database via WebSockets.",
@@ -358,7 +359,8 @@ I currently serve as President of the Computer Society of India (ASEB chapter) a
         "Temporary locks with automatic expiry solved double-booking more cleanly than trying to validate at final submit.",
         "For a transactional bot like this, response latency is part of the UX — a slower but 'smarter' model would have hurt conversion."
       ],
-      featured: true
+      featured: true,
+      images: ["/projects/cuecourtos-1.png"]
     },
 
     {

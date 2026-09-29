@@ -329,6 +329,33 @@ body {
   animation: march 1.6s linear infinite;
 }
 
+/* Skills: signals hopping through the little neural net. */
+@keyframes nn-hop {
+  from {
+    stroke-dashoffset: 16;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+.nn-pulse {
+  stroke-dasharray: 16 100;
+  stroke-dashoffset: 16;
+  animation: nn-hop 3s ease-in-out infinite;
+}
+@keyframes nn-glow {
+  0%,
+  100% {
+    fill: #0a0f1c;
+  }
+  50% {
+    fill: rgba(232, 121, 249, 0.35);
+  }
+}
+.nn-node {
+  animation: nn-glow 3s ease-in-out infinite;
+}
+
 @keyframes blink {
   50% {
     opacity: 0;

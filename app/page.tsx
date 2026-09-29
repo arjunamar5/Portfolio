@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { TourRail } from "@/components/TourRail";
-import { ProblemToProduct } from "@/components/ProblemToProduct";
+import { ProblemCompiler } from "@/components/ProblemCompiler";
 import { ProjectsShowcase } from "@/components/ProjectsShowcase";
 import { Research } from "@/components/Research";
 import { Skills } from "@/components/Skills";
@@ -32,7 +32,7 @@ export default function Home() {
 
       <Hero onOpenResume={openResume} ready={ready} />
       <About />
-      <ProblemToProduct />
+      <ProblemCompiler />
       <ProjectsShowcase />
       <Research />
       <Skills />

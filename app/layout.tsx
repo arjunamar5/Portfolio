@@ -11,14 +11,17 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Arjun R Amarnath",
+  title: "Arjun R Amarnath — Full-Stack & AI/ML Developer",
   description:
-    "Portfolio of Arjun R Amarnath — a final-year Computer Science student building full-stack products, applied AI systems, and cloud-native infrastructure.",
+    "Portfolio of Arjun R Amarnath — a Computer Science graduate and full-stack & AI/ML developer building LLM-powered applications, RAG systems, and production web platforms.",
   keywords: [
     "Arjun R Amarnath",
     "Full-Stack Developer",
-    "Computer Science Student",
-    "Cloud Computing",
+    "AI/ML Developer",
+    "LLM",
+    "RAG",
+    "React.js",
+    "AWS",
     "Software Engineer Portfolio",
   ],
   authors: [{ name: "Arjun R Amarnath" }],

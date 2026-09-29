@@ -31,7 +31,11 @@ html.lenis {
   scroll-behavior: auto !important;
 }
 
+/* `clip` (unlike hidden/auto) doesn't create a scroll container, so sticky
+   descendants keep working — and it stops off-canvas entrance animations
+   from widening the mobile layout viewport. */
 body {
+  overflow-x: clip;
   background-color: var(--background);
   color: var(--bone);
   text-rendering: optimizeLegibility;
@@ -156,5 +160,216 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion & effects layer                                              */
+/* ------------------------------------------------------------------ */
+
+/* Animated accent gradient used on key words (name, headline accents). */
+.text-gradient {
+  background: linear-gradient(110deg, #3b82f6 0%, #22d3ee 30%, #60a5fa 55%, #a5b4fc 75%, #3b82f6 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 7s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: 220% center;
+  }
+}
+
+/* Slow-drifting aurora blobs behind the hero. */
+.aurora-blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  will-change: transform;
+  animation: aurora 18s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(9%, -7%, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(-7%, 9%, 0) scale(0.94);
+  }
+}
+
+/* Faint engineering grid, masked by callers. */
+.grid-bg {
+  background-image: linear-gradient(rgba(148, 163, 199, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 199, 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Light sweep across primary buttons on hover. */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* Cursor-tracking spotlight + border glow (see SpotlightCard).
+   Pseudo-elements sit at z-index -1 inside an isolated stacking context:
+   above the card's own background, below its content. */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before,
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.spotlight::before {
+  background: radial-gradient(
+    380px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(var(--spot, 59, 130, 246), 0.12),
+    transparent 45%
+  );
+}
+.spotlight::after {
+  padding: 1px;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(var(--spot, 59, 130, 246), 0.7),
+    transparent 55%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.spotlight:hover::before,
+.spotlight:hover::after {
+  opacity: 1;
+}
+
+/* Rotating conic border — used on the one "hero" card per section. */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.conic-border {
+  position: relative;
+  isolation: isolate;
+}
+.conic-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle), transparent 0deg, rgba(59, 130, 246, 0.9) 60deg, rgba(34, 211, 238, 0.9) 110deg, transparent 170deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-angle 6s linear infinite;
+}
+@keyframes spin-angle {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* MRI illustration: scan sweep + segmentation "marching ants". */
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(-20%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(520%);
+    opacity: 0;
+  }
+}
+.scan-line {
+  animation: scan-sweep 3.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes march {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+.marching {
+  stroke-dasharray: 6 4;
+  animation: march 1.6s linear infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.caret {
+  animation: blink 1s steps(1) infinite;
+}
+
+/* Hero scroll cue. */
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+.scroll-cue {
+  animation: scroll-cue 1.8s ease-in-out infinite;
+}
+
+/* If JS never hydrates, never leave the intro overlay covering the page. */
+@keyframes preloader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.preloader {
+  animation: preloader-failsafe 0.4s ease 5s forwards;
+}
+
+@media (pointer: coarse) {
+  .spotlight::before,
+  .spotlight::after {
+    display: none;
   }
 }

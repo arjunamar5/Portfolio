@@ -2,6 +2,7 @@
 
 import React, { useMemo, useRef } from "react";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
+import { Code2, LayoutTemplate, Server, Database, Sparkles, Cloud, GitBranch, LucideIcon } from "lucide-react";
 import {
   SiReact,
   SiNextdotjs,
@@ -16,6 +17,9 @@ import {
   SiFlask,
   SiPython,
   SiPytorch,
+  SiOpencv,
+  SiYolo,
+  SiOllama,
   SiOpenjdk,
   SiMysql,
   SiMongodb,
@@ -26,7 +30,74 @@ import {
   SiGithub,
 } from "react-icons/si";
 import { FaAws } from "react-icons/fa";
-import { TECH_STACK, TechEntry } from "@/data/portfolio-data";
+import { PORTFOLIO_DATA, TECH_STACK, TechEntry, SkillCategory } from "@/data/portfolio-data";
+import { SectionHeading } from "./SectionHeading";
+import { SpotlightCard } from "./SpotlightCard";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const CATEGORY_ICON: Record<string, LucideIcon> = {
+  Languages: Code2,
+  Frontend: LayoutTemplate,
+  Backend: Server,
+  Database: Database,
+  "AI-ML & GenAI": Sparkles,
+  "Cloud Technologies": Cloud,
+  "Version Control": GitBranch,
+};
+
+// Bento spans on the 3-column grid; the AI/GenAI card is the wide, highlighted one.
+const CATEGORY_SPAN: Record<string, string> = {
+  "AI-ML & GenAI": "lg:col-span-2",
+  "Cloud Technologies": "lg:col-span-2",
+};
+
+function CategoryCard({ group, i }: { group: SkillCategory; i: number }) {
+  const Icon = CATEGORY_ICON[group.title] ?? Code2;
+  const featured = group.title === "AI-ML & GenAI";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.7, delay: (i % 3) * 0.08, ease: EASE }}
+      className={CATEGORY_SPAN[group.title] ?? ""}
+    >
+      <SpotlightCard className={`card rounded-2xl p-6 h-full ${featured ? "conic-border" : ""}`}>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/25 flex items-center justify-center">
+            <Icon className="w-[18px] h-[18px] text-accent-soft" />
+          </div>
+          <div>
+            <div className="text-sm font-medium text-bone">{group.title}</div>
+            <div className="text-[11px] text-faint">{group.skills.length} tools</div>
+          </div>
+        </div>
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04, delayChildren: 0.15 } } }}
+          className="flex flex-wrap gap-2"
+        >
+          {group.skills.map((s) => (
+            <motion.span
+              key={s.name}
+              variants={{
+                hidden: { opacity: 0, scale: 0.8, y: 6 },
+                show: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 380, damping: 22 } },
+              }}
+              whileHover={{ y: -2 }}
+              className="text-xs text-dim border border-line bg-panel-2/40 rounded-lg px-2.5 py-1.5 hover:text-bone hover:border-accent/50 hover:bg-accent/10 transition-colors cursor-default"
+            >
+              {s.name}
+            </motion.span>
+          ))}
+        </motion.div>
+      </SpotlightCard>
+    </motion.div>
+  );
+}
 
 const ICONS: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
   SiReact,
@@ -42,6 +113,9 @@ const ICONS: Record<string, React.ComponentType<{ className?: string; size?: num
   SiFlask,
   SiPython,
   SiPytorch,
+  SiOpencv,
+  SiYolo,
+  SiOllama,
   SiOpenjdk,
   SiMysql,
   SiMongodb,
@@ -121,11 +195,14 @@ export function Skills() {
 
   return (
     <section id="stack" className="relative py-28 sm:py-36 border-t border-line overflow-hidden">
-      <div className="max-w-[1100px] mx-auto px-6 sm:px-10 mb-14">
-        <span className="eyebrow !text-faint">Skills</span>
-        <h2 className="font-semibold text-3xl sm:text-4xl leading-tight tracking-tight text-bone mt-3">
-          Technologies I work with.
-        </h2>
+      <div className="max-w-[1180px] mx-auto px-6 sm:px-10 mb-16">
+        <SectionHeading index="05" eyebrow="Skills" title="Technologies I work with." accentFrom={1} />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
+          {PORTFOLIO_DATA.skills.map((group, i) => (
+            <CategoryCard key={group.title} group={group} i={i} />
+          ))}
+        </div>
       </div>
 
       <div className="space-y-4">

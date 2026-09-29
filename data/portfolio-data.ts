@@ -12,6 +12,8 @@ export interface ExperienceItem {
   summary: string;
   highlights: string[];
   techStack: string[];
+  /** Short resume-grounded outcomes shown as chips on the timeline card. */
+  metrics: { value: string; label: string }[];
 }
 
 export interface ProjectCaseStudy {
@@ -53,6 +55,15 @@ export interface TechEntry {
   label: string;
 }
 
+export interface Stat {
+  /** Numeric part animates as a count-up; prefix/suffix are static. */
+  value: number;
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+  label: string;
+}
+
 export interface ResearchPaper {
   id: string;
   title: string;
@@ -66,64 +77,79 @@ export interface ResearchPaper {
 export const PORTFOLIO_DATA = {
   personal: {
     name: "Arjun R Amarnath",
-    title: "Full-Stack Developer",
+    title: "Full-Stack & AI/ML Developer",
     location: "Coimbatore, India",
     email: "arjunamarnath1008@gmail.com",
     linkedin: "https://linkedin.com/in/arjun-r-amarnath",
-    bioShort: "Final-year CS student building full-stack products, applied AI, and cloud-native systems.",
-    bioLong: `I'm a Computer Science graduate and software developer who enjoys turning ideas into practical, real-world applications. I work across full-stack development, AI, cloud technologies, and software engineering, with experience building and deploying applications for real users.
+    resumeUrl: "/Arjun_R_Amarnath_Resume.pdf",
+    bioShort: "Computer Science graduate building full-stack products and LLM-powered applications — from RAG systems to cloud-deployed platforms used by real businesses.",
+    summary:
+      "Computer Science graduate with hands-on experience in full-stack development and AI/ML, with a focus on LLM-powered applications and RAG systems. Experienced in Python, React.js, AWS, Ollama, and retrieval-augmented generation, with experience building and deploying real-world web and AI applications.",
+    bioLong: `I'm a Computer Science graduate with hands-on experience in full-stack development and AI/ML, with a focus on LLM-powered applications and retrieval-augmented generation (RAG). I work across Python, React.js, Node.js, AWS and Ollama, and I've built and deployed production platforms that real businesses run on every day.
 
-I'm particularly interested in exploring how different technologies come together to solve meaningful problems, from scalable web platforms and cloud infrastructure to AI-powered systems. Beyond development, I've also taken on leadership roles, including serving as President of the Computer Society of India (ASEB Chapter) at my university.`,
+I enjoy exploring how different technologies come together to solve meaningful problems — from booking engines and multi-branch management platforms to medical-imaging AI with explainable, locally-run GenAI assistants. Beyond development, I've served as President of the Computer Society of India (ASEB Chapter) at my university.`,
     education: {
       institution: "Amrita Vishwa Vidyapeetham",
       degree: "B.Tech in Computer Science and Engineering",
-      period: "2022 – 2026",
+      period: "Sept 2022 – Aug 2026",
       detail: "CGPA: 8.26",
     },
     typingTitles: [
       "Full-Stack Developer",
-      "Computer Science Student",
-      "Cloud & AI Enthusiast"
+      "AI / ML Developer",
+      "LLM & RAG Builder",
+      "Cloud Enthusiast"
     ],
+    focusAreas: ["Full-Stack Development", "AI / ML", "LLMs & RAG", "Computer Vision", "Cloud (AWS)"],
+    leadership: {
+      role: "President",
+      organization: "Computer Society of India (ASEB)",
+      description:
+        "Led the CSI team in organizing and executing technical events and coding competitions, overseeing task delegation and coordination while fostering effective teamwork and communication.",
+    },
     researchNote: "8 papers accepted/published in Scopus-indexed international conferences, including IEEE and Springer.",
+    stats: [
+      { value: 8, label: "Research papers" },
+      { value: 2, label: "Client platforms shipped" },
+      { value: 300, suffix: "+", label: "Student profiles managed" },
+      { value: 8.26, decimals: 2, label: "CGPA" },
+    ] as Stat[],
   },
 
   skills: [
     {
-      title: "Web Technologies",
-      skills: [
-        { name: "HTML" }, { name: "CSS" }, { name: "JavaScript" }, { name: "React.js" },
-      ],
-    },
-    {
-      title: "Frontend Tooling",
-      skills: [
-        { name: "Next.js" }, { name: "TypeScript" }, { name: "Tailwind CSS" }, { name: "Framer Motion" },
-      ],
-    },
-    {
-      title: "Backend & Databases",
-      skills: [
-        { name: "Node.js" }, { name: "Express.js" }, { name: "Flask" }, { name: "MySQL" }, { name: "MongoDB" }, { name: "PostgreSQL" }, { name: "Supabase" },
-      ],
-    },
-    {
-      title: "Cloud & DevOps",
-      skills: [
-        { name: "AWS (EC2, S3, API Gateway, CloudWatch, SNS)" }, { name: "Docker" }, { name: "Git" }, { name: "GitHub" },
-      ],
-    },
-    {
       title: "Languages",
+      skills: [{ name: "Java" }, { name: "Python" }, { name: "SQL" }, { name: "JavaScript" }, { name: "TypeScript" }],
+    },
+    {
+      title: "Frontend",
       skills: [
-        { name: "Java" }, { name: "Python" }, { name: "SQL" },
+        { name: "HTML" }, { name: "CSS" }, { name: "React.js" }, { name: "Next.js" }, { name: "Tailwind CSS" }, { name: "Framer Motion" },
       ],
     },
     {
-      title: "Artificial Intelligence & ML",
+      title: "Backend",
+      skills: [{ name: "Node.js" }, { name: "Express.js" }, { name: "Flask" }, { name: "Supabase" }],
+    },
+    {
+      title: "Database",
+      skills: [{ name: "MySQL" }, { name: "MongoDB" }, { name: "PostgreSQL" }],
+    },
+    {
+      title: "AI-ML & GenAI",
       skills: [
-        { name: "CNN" }, { name: "EfficientNet" }, { name: "YOLO" }, { name: "U-Net" }, { name: "Grad-CAM" }, { name: "PyTorch" }, { name: "OpenCV" }, { name: "Local RAG (Ollama)" },
+        { name: "YOLO" }, { name: "OpenCV" }, { name: "LLMs" }, { name: "RAG" }, { name: "Ollama" }, { name: "PyTorch" }, { name: "CNN" }, { name: "EfficientNet" }, { name: "U-Net" }, { name: "Grad-CAM" },
       ],
+    },
+    {
+      title: "Cloud Technologies",
+      skills: [
+        { name: "AWS EC2" }, { name: "S3" }, { name: "API Gateway" }, { name: "CloudWatch" }, { name: "SNS" }, { name: "Docker" },
+      ],
+    },
+    {
+      title: "Version Control",
+      skills: [{ name: "Git" }, { name: "GitHub" }],
     },
   ] as SkillCategory[],
 
@@ -134,15 +160,18 @@ I'm particularly interested in exploring how different technologies come togethe
       role: "Full-Stack Developer",
       period: "May 2026 – Jun 2026",
       location: "Coimbatore, India",
-      summary: "Architected and built a comprehensive enterprise sports venue management platform that digitizes court bookings, food ordering, customer memberships, revenue analytics, and automated AI notifications.",
+      summary: "Built a full-stack booking and billing platform for a sports venue & café — from WhatsApp bookings to an AI analytics assistant.",
       highlights: [
-        "Architected real-time court booking engine with automatic slot locking to prevent double bookings.",
-        "Built automated Food & Beverage Billing POS integrated directly with reserved court tabs.",
-        "Designed Membership & Loyalty Management system driving recurring venue revenue.",
-        "Implemented real-time Revenue Analytics dashboard with predictive slot demand forecasting.",
-        "Integrated CueBot AI Assistant powered by WhatsApp Cloud API for automated customer booking, slot inquiries, and instant reminders.",
+        "Developed a full-stack booking platform with automated WhatsApp bookings, real-time court blocking, and centralized slot tracking.",
+        "Automated billing with court add-ons, food orders, and membership-based pricing, reducing manual billing effort.",
+        "Built CueBot, an AI-powered analytics assistant for instant natural-language insights into revenue, bookings, customers, and sales.",
       ],
       techStack: ["React.js", "Node.js", "Express.js", "PostgreSQL", "WhatsApp Cloud API", "Tailwind CSS", "Chart.js"],
+      metrics: [
+        { value: "WhatsApp", label: "Automated bookings" },
+        { value: "Real-time", label: "Court blocking" },
+        { value: "CueBot", label: "AI analytics" },
+      ],
     },
     {
       id: "perfect-study-space",
@@ -150,15 +179,18 @@ I'm particularly interested in exploring how different technologies come togethe
       role: "Full-Stack Developer",
       period: "Jun 2026 – Jul 2026",
       location: "Coimbatore, India",
-      summary: "Engineered a multi-tenant SaaS management platform supporting study centers across multiple branches with automated attendance tracking, CRM pipeline, revenue analytics, staff shift control, and AI study assistance.",
+      summary: "Built a multi-branch management platform and the public website for a chain of study centres, centralizing daily operations.",
       highlights: [
-        "Built scalable multi-branch SaaS architecture separating tenant data securely with strict RBAC rules.",
-        "Engineered automated member attendance tracking system with real-time capacity monitoring.",
-        "Developed full CRM pipeline for lead conversion, membership renewals, and automated WhatsApp alert triggers.",
-        "Created centralized Staff Operations Dashboard & automated payroll & session verification.",
-        "Embedded an AI Assistant trained on study schedules, seat allocation rules, and administrative workflows.",
+        "Developed a multi-branch management platform supporting 3 branches, 5 staff, and 300+ student profiles, centralizing daily operations.",
+        "Automated student registration, attendance, fee management, seat allocation, and notifications, reducing manual administrative work.",
+        "Developed and deployed the organization website, increasing daily student enquiries by 50% across 3 branches.",
       ],
       techStack: ["Next.js", "TypeScript", "Node.js", "MongoDB", "Supabase", "Tailwind CSS", "Docker"],
+      metrics: [
+        { value: "3", label: "Branches" },
+        { value: "300+", label: "Student profiles" },
+        { value: "+50%", label: "Daily enquiries" },
+      ],
     },
   ] as ExperienceItem[],
 
@@ -168,8 +200,8 @@ I'm particularly interested in exploring how different technologies come togethe
       title: "AI-Powered Brain Tumor Detection & Clinical Decision Support System",
       shortTitle: "Brain Tumor AI",
       category: "Medical Artificial Intelligence",
-      tagline: "End-to-end medical vision platform for brain abnormality detection, U-Net segmentation, Grad-CAM heatmaps, and Local RAG decision support.",
-      description: "An advanced clinical AI platform that assists radiologists and doctors in identifying brain tumors from raw MRI scans. Combines deep CNN models (EfficientNet, YOLO, U-Net) for classification and pixel-wise tumor segmentation with Explainable AI (Grad-CAM) and a Local RAG clinical assistant trained on medical literature.",
+      tagline: "Multimodal AI system that classifies, localizes, and segments brain abnormalities in MRI scans — with explainable heatmaps and a local RAG clinical assistant.",
+      description: "Combines CNN, EfficientNet, YOLO, and U-Net for MRI classification, localization, and segmentation. Grad-CAM makes every prediction explainable, and a local RAG-based GenAI assistant running on Ollama retrieves relevant context to generate natural-language clinical insights — without patient data ever leaving the machine.",
       confidentialityTag: "Official Academic Project",
       problemStatement: "Diagnostic errors and time lag in radiologic scan evaluation can delay urgent neurosurgical interventions. Traditional deep neural networks act as 'black boxes', lacking clinical explainability and real-time medical guidelines contextualization.",
       objectives: [
@@ -180,15 +212,15 @@ I'm particularly interested in exploring how different technologies come togethe
       ],
       architectureOverview: "DICOM/PNG Scans -> Preprocessing Pipeline -> EfficientNet/YOLO Multi-Class Classifier -> U-Net Pixel Segmentation -> Grad-CAM Heatmap Generation -> Local Vector DB (FAISS/Chroma) + Llama-3 Clinical RAG Agent -> Interactive Radiologist Workstation UI.",
       techStack: [
-        { category: "AI & ML", items: ["PyTorch", "CNN", "YOLOv8", "EfficientNet-B4", "U-Net", "Grad-CAM", "OpenCV"] },
-        { category: "Local RAG & NLP", items: ["LangChain", "Ollama (Llama-3)", "FAISS Vector DB", "Python"] },
-        { category: "Full Stack UI", items: ["Next.js", "Tailwind CSS", "Canvas API", "REST APIs"] }
+        { category: "AI & ML", items: ["Python", "PyTorch", "CNN", "EfficientNet", "YOLO", "U-Net", "Grad-CAM", "OpenCV"] },
+        { category: "GenAI", items: ["Ollama", "RAG"] },
+        { category: "Backend", items: ["Flask"] }
       ],
       keyFeatures: [
-        { title: "Interactive MRI Viewer", description: "Multi-modal viewer to switch between raw T1/T2 MRI scans, segmented tumor masks, and heatmaps." },
-        { title: "Grad-CAM Explainability", description: "Renders visual heatmap overlays showing exact feature regions triggering the neural network diagnosis." },
-        { title: "U-Net Precise Segmentation", description: "Calculates precise tumor volume measurements and pixel boundaries automatically." },
-        { title: "Privacy-Preserving Local RAG", description: "Instant diagnostic assistance drawing from medical literature running 100% locally." }
+        { title: "MRI Classification", description: "CNN and EfficientNet models classify brain abnormalities from MRI scans." },
+        { title: "YOLO Localization", description: "Bounding-box localization of the abnormal region on each scan." },
+        { title: "U-Net Segmentation", description: "Pixel-level segmentation masks outlining the lesion boundary." },
+        { title: "Grad-CAM + Local RAG", description: "Explainable heatmaps plus an Ollama-powered RAG assistant for natural-language clinical insights." }
       ],
       developmentJourney: "Developed through extensive iteration on 10,000+ DICOM brain MRI images. Implemented transfer learning with EfficientNet for initial screening, then paired it with a custom U-Net for dense segmentation. Integrated Grad-CAM to allow clinicians to inspect activation heatmaps before validating diagnoses.",
       challengesAndSolutions: [
@@ -196,10 +228,9 @@ I'm particularly interested in exploring how different technologies come togethe
         { challenge: "HIPAA compliance and cloud data security concerns.", solution: "Engineered 100% local RAG workflow utilizing Ollama and local vector indices on workstation GPUs." }
       ],
       impactMetrics: [
-        { label: "Classification Accuracy", value: "98.7%" },
-        { label: "Segmentation IoU Score", value: "0.91" },
-        { label: "Diagnostic Time Saved", value: "65%" },
-        { label: "Local RAG Latency", value: "<1.2s" }
+        { label: "Classify · Localize · Segment", value: "3-in-1" },
+        { label: "Explainable predictions", value: "Grad-CAM" },
+        { label: "Local RAG assistant", value: "Ollama" }
       ],
       codeSnippet: {
         title: "Grad_CAM_Explainer.py",
@@ -253,7 +284,8 @@ I'm particularly interested in exploring how different technologies come togethe
       keyLearnings: [
         "Explainability isn't optional in medical AI — Grad-CAM overlays were what actually earned trust from clinicians reviewing the tool, not the accuracy number alone.",
         "Segmentation and classification benefit from being solved as separate, focused problems rather than one end-to-end model."
-      ]
+      ],
+      featured: true
     },
 
     {
@@ -289,10 +321,9 @@ I'm particularly interested in exploring how different technologies come togethe
         { challenge: "Member churn due to forgotten renewals.", solution: "Automated a 3-stage WhatsApp reminder sequence with instant 1-click renewal links." }
       ],
       impactMetrics: [
-        { label: "Active Branches Managed", value: "8+" },
-        { label: "Daily Active Members", value: "2,500+" },
-        { label: "Member Renewal Boost", value: "34%" },
-        { label: "Admin Work Hours Saved", value: "20 hrs/wk" }
+        { label: "Branches", value: "3" },
+        { label: "Student profiles", value: "300+" },
+        { label: "Daily enquiries", value: "+50%" }
       ],
       visualType: "study-saas",
       accent: "#38BDF8",
@@ -342,10 +373,9 @@ I'm particularly interested in exploring how different technologies come togethe
         { challenge: "High latency in WhatsApp bot responses.", solution: "Optimized NLP intent parsing to respond in under 400ms with interactive WhatsApp list buttons." }
       ],
       impactMetrics: [
-        { label: "Court Utilization Increase", value: "+42%" },
-        { label: "Double Bookings", value: "0%" },
-        { label: "WhatsApp Bookings Share", value: "68%" },
-        { label: "Cafe Revenue Growth", value: "+28%" }
+        { label: "Automated bookings", value: "WhatsApp" },
+        { label: "Court blocking", value: "Real-time" },
+        { label: "AI analytics assistant", value: "CueBot" }
       ],
       visualType: "court-booking",
       accent: "#D97A52",
@@ -609,6 +639,9 @@ export const TECH_STACK: TechEntry[] = [
   { name: "Flask", icon: "SiFlask", label: "Backend" },
   { name: "Python", icon: "SiPython", label: "Language" },
   { name: "PyTorch", icon: "SiPytorch", label: "AI / ML" },
+  { name: "OpenCV", icon: "SiOpencv", label: "Computer Vision" },
+  { name: "YOLO", icon: "SiYolo", label: "Object Detection" },
+  { name: "Ollama", icon: "SiOllama", label: "Local LLMs" },
   { name: "Java", icon: "SiOpenjdk", label: "Language" },
   { name: "MySQL", icon: "SiMysql", label: "Database" },
   { name: "MongoDB", icon: "SiMongodb", label: "Database" },

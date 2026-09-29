@@ -2,7 +2,11 @@
 
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { BookOpen } from "lucide-react";
 import { PORTFOLIO_DATA } from "@/data/portfolio-data";
+import { SectionHeading } from "./SectionHeading";
+import { SpotlightCard } from "./SpotlightCard";
+import { CountUp } from "./CountUp";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -32,21 +36,40 @@ export function Research() {
   const papers = PORTFOLIO_DATA.research;
 
   return (
-    <section id="research" className="relative py-28 sm:py-36 border-t border-line">
+    <section id="research" className="relative py-28 sm:py-36 border-t border-line overflow-hidden">
+      <div className="pointer-events-none absolute -right-40 top-20 w-[480px] h-[480px] rounded-full bg-accent/[0.07] blur-[120px]" />
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.6, ease: EASE }}
-          className="mb-14"
-        >
-          <span className="eyebrow !text-faint">Research</span>
-          <h2 className="font-semibold text-3xl sm:text-4xl leading-tight tracking-tight text-bone mt-3">
-            Publications.
-          </h2>
-          <p className="text-dim mt-3 max-w-lg">{PORTFOLIO_DATA.personal.researchNote}</p>
-        </motion.div>
+        <div className="mb-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-end">
+          <SectionHeading
+            index="04"
+            eyebrow="Research"
+            title="Publications."
+            lede={PORTFOLIO_DATA.personal.researchNote}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.6 }}
+            transition={{ duration: 0.8, ease: EASE }}
+          >
+            <SpotlightCard className="conic-border card rounded-2xl px-7 py-5 flex items-center gap-5">
+              <div className="text-6xl font-semibold leading-none text-gradient">
+                <CountUp value={8} />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 text-sm font-medium text-bone">
+                  <BookOpen className="w-4 h-4 text-accent-soft" />
+                  Papers
+                </div>
+                <div className="text-xs text-faint mt-1 leading-snug">
+                  Scopus-indexed
+                  <br />
+                  IEEE &amp; Springer
+                </div>
+              </div>
+            </SpotlightCard>
+          </motion.div>
+        </div>
 
         <div ref={listRef} className="relative">
           {/* Static spine — connects every tile even before it's scrolled into focus. */}
@@ -54,24 +77,27 @@ export function Research() {
           {/* Animated overlay — fills in as you scroll through the list, softly glowing. */}
           <motion.div
             style={{ scaleY: spineScale, boxShadow: "0 0 8px rgba(59,130,246,0.5)" }}
-            className="absolute left-[6px] top-2.5 bottom-2.5 w-px bg-accent origin-top"
+            className="absolute left-[6px] top-2.5 bottom-2.5 w-px bg-gradient-to-b from-accent to-neon origin-top"
           />
 
           <div className="space-y-4">
             {papers.map((paper, i) => (
               <motion.div
                 key={paper.id}
-                initial={{ opacity: 0, x: -16 }}
+                initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.5, delay: i * 0.05, ease: EASE }}
+                transition={{ duration: 0.7, delay: i * 0.08, ease: EASE }}
                 className="relative grid grid-cols-[24px_1fr] gap-x-5 sm:gap-x-6 items-center"
               >
                 <Node progress={scrollYProgress} threshold={i / (papers.length - 1)} />
 
-                <div className="card rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-line-strong transition-colors duration-300">
+                <SpotlightCard className="card rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-line-strong hover:translate-x-1 transition-all duration-300">
                   <div className="min-w-0">
-                    {paper.conference && <div className="text-xs text-faint mb-1">{paper.conference}</div>}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-faint mb-1">
+                      <span className="font-mono text-accent-soft whitespace-nowrap">P-{String(i + 1).padStart(2, "0")}</span>
+                      {paper.conference && <span>{paper.conference}</span>}
+                    </div>
                     <div className="text-sm sm:text-base font-medium text-bone leading-snug">{paper.title}</div>
                   </div>
                   <div className="flex flex-wrap gap-1.5 shrink-0">
@@ -81,7 +107,7 @@ export function Research() {
                       </span>
                     ))}
                   </div>
-                </div>
+                </SpotlightCard>
               </motion.div>
             ))}
           </div>

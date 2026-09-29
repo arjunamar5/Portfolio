@@ -1,33 +1,45 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
+import { Experience } from "@/components/Experience";
 import { ProjectsShowcase } from "@/components/ProjectsShowcase";
 import { Research } from "@/components/Research";
 import { Skills } from "@/components/Skills";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { ResumeModal } from "@/components/ResumeModal";
+import { Preloader } from "@/components/Preloader";
+import { ScrollProgress, BackToTop, CursorFx } from "@/components/ScrollFx";
 
 export default function Home() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
+  const [ready, setReady] = useState(false);
+  const reveal = useCallback(() => setReady(true), []);
+  const openResume = useCallback(() => setIsResumeOpen(true), []);
+  const closeResume = useCallback(() => setIsResumeOpen(false), []);
 
   return (
     <main className="min-h-screen bg-void text-bone relative">
-      <Navbar onOpenResume={() => setIsResumeOpen(true)} />
+      <Preloader onReveal={reveal} />
+      <CursorFx />
+      <ScrollProgress />
+      <Navbar onOpenResume={openResume} />
 
-      <Hero onOpenResume={() => setIsResumeOpen(true)} />
+      <Hero onOpenResume={openResume} ready={ready} />
       <About />
+      <Experience />
       <ProjectsShowcase />
       <Research />
       <Skills />
-      <Contact onOpenResume={() => setIsResumeOpen(true)} />
+      <Contact onOpenResume={openResume} />
 
       <Footer />
 
-      <ResumeModal isOpen={isResumeOpen} onClose={() => setIsResumeOpen(false)} />
+      <BackToTop />
+      <ResumeModal isOpen={isResumeOpen} onClose={closeResume} />
     </main>
   );
 }

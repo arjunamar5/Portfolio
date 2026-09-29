@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Layout, Server, Database, Cloud, Sparkles, Code2, GitBranch, LucideIcon } from "lucide-react";
 import {
-  SiReact, SiNextdotjs, SiHtml5, SiCss, SiTailwindcss, SiFramer, SiNodedotjs, SiExpress, SiFlask, SiSupabase,
+  SiReact, SiNextdotjs, SiHtml5, SiCss, SiTailwindcss, SiNodedotjs, SiExpress, SiFlask, SiSupabase,
   SiMysql, SiMongodb, SiPostgresql, SiPytorch, SiOpencv, SiYolo, SiOllama, SiDocker, SiGit, SiGithub,
   SiOpenjdk, SiPython, SiJavascript, SiTypescript,
 } from "react-icons/si";
@@ -22,7 +22,6 @@ const TOOL: Record<string, { icon?: React.ComponentType<{ className?: string; st
   "React.js": { icon: SiReact, color: "#61DAFB" },
   "Next.js": { icon: SiNextdotjs, color: WHITE },
   "Tailwind CSS": { icon: SiTailwindcss, color: "#38BDF8" },
-  "Framer Motion": { icon: SiFramer, color: "#0099FF" },
   "Node.js": { icon: SiNodedotjs, color: "#5FA04E" },
   "Express.js": { icon: SiExpress, color: WHITE },
   Flask: { icon: SiFlask, color: WHITE },
@@ -36,15 +35,7 @@ const TOOL: Record<string, { icon?: React.ComponentType<{ className?: string; st
   RAG: { color: "#C084FC", mono: "RAG" },
   Ollama: { icon: SiOllama, color: WHITE },
   PyTorch: { icon: SiPytorch, color: "#EE4C2C" },
-  CNN: { color: "#F472B6", mono: "CNN" },
-  EfficientNet: { color: "#FB7185", mono: "EN" },
-  "U-Net": { color: "#A78BFA", mono: "U" },
-  "Grad-CAM": { color: "#F97316", mono: "GC" },
-  "AWS EC2": { icon: FaAws, color: "#FF9900" },
-  S3: { icon: FaAws, color: "#FF9900" },
-  "API Gateway": { icon: FaAws, color: "#FF9900" },
-  CloudWatch: { icon: FaAws, color: "#FF9900" },
-  SNS: { icon: FaAws, color: "#FF9900" },
+  AWS: { icon: FaAws, color: "#FF9900" },
   Docker: { icon: SiDocker, color: "#2496ED" },
   Java: { icon: SiOpenjdk, color: "#F89820" },
   Python: { icon: SiPython, color: "#FFD43B" },
@@ -55,16 +46,16 @@ const TOOL: Record<string, { icon?: React.ComponentType<{ className?: string; st
   GitHub: { icon: SiGithub, color: WHITE },
 };
 
-type Domain = { group: string; title: string; sub: string; icon: LucideIcon; from: string; to: string; span: string; net?: boolean };
+type Domain = { group: string; title: string; sub: string; icon: LucideIcon; from: string; to: string; span: string };
 
 const DOMAINS: Domain[] = [
-  { group: "Frontend", title: "Frontend", sub: "Interfaces people enjoy", icon: Layout, from: "#38BDF8", to: "#6366F1", span: "sm:col-span-2" },
-  { group: "AI-ML & GenAI", title: "AI · ML & GenAI", sub: "Vision models, LLMs & RAG", icon: Sparkles, from: "#E879F9", to: "#8B5CF6", span: "sm:col-span-2 lg:row-span-2", net: true },
-  { group: "Backend", title: "Backend & APIs", sub: "Logic & integrations", icon: Server, from: "#34D399", to: "#059669", span: "" },
-  { group: "Languages", title: "Languages", sub: "What I write in", icon: Code2, from: "#A5B4FC", to: "#3B82F6", span: "" },
-  { group: "Cloud Technologies", title: "Cloud & DevOps", sub: "Ship it, keep it up", icon: Cloud, from: "#FB923C", to: "#F43F5E", span: "sm:col-span-2" },
-  { group: "Database", title: "Databases", sub: "Data that stays put", icon: Database, from: "#FBBF24", to: "#F97316", span: "" },
-  { group: "Version Control", title: "Version Control", sub: "Change, safely", icon: GitBranch, from: "#F472B6", to: "#F43F5E", span: "" },
+  { group: "Frontend", title: "Frontend", sub: "Interfaces people enjoy", icon: Layout, from: "#38BDF8", to: "#6366F1", span: "lg:col-span-3" },
+  { group: "AI-ML & GenAI", title: "AI · ML & GenAI", sub: "Vision models, LLMs & RAG", icon: Sparkles, from: "#E879F9", to: "#8B5CF6", span: "lg:col-span-3" },
+  { group: "Backend", title: "Backend & APIs", sub: "Logic & integrations", icon: Server, from: "#34D399", to: "#059669", span: "lg:col-span-2" },
+  { group: "Database", title: "Databases", sub: "Data that stays put", icon: Database, from: "#FBBF24", to: "#F97316", span: "lg:col-span-2" },
+  { group: "Cloud Technologies", title: "Cloud & DevOps", sub: "Ship it, keep it up", icon: Cloud, from: "#FB923C", to: "#F43F5E", span: "lg:col-span-2" },
+  { group: "Languages", title: "Languages", sub: "What I write in", icon: Code2, from: "#A5B4FC", to: "#3B82F6", span: "lg:col-span-4" },
+  { group: "Version Control", title: "Version Control", sub: "Change, safely", icon: GitBranch, from: "#F472B6", to: "#F43F5E", span: "sm:col-span-2 lg:col-span-2" },
 ];
 
 function Tile({ name, i }: { name: string; i: number }) {
@@ -93,71 +84,6 @@ function Tile({ name, i }: { name: string; i: number }) {
       </span>
       <span className="text-[10.5px] sm:text-[11px] text-dim group-hover/tile:text-bone transition-colors text-center leading-tight">{name}</span>
     </motion.div>
-  );
-}
-
-/** A small live network: signals hop layer to layer (fills the tall AI card on desktop). */
-const LAYERS = [
-  [30, 60, 90],
-  [18, 42, 66, 90].map((y) => y - 6),
-  [22, 50, 78].map((y) => y + 2),
-  [60],
-];
-const COLS_X = [24, 140, 256, 356];
-
-function NeuralNet({ from, to }: { from: string; to: string }) {
-  const edges: { x1: number; y1: number; x2: number; y2: number; k: number }[] = [];
-  let k = 0;
-  for (let l = 0; l < LAYERS.length - 1; l++)
-    for (const y1 of LAYERS[l]) for (const y2 of LAYERS[l + 1]) edges.push({ x1: COLS_X[l], y1, x2: COLS_X[l + 1], y2, k: k++ });
-  return (
-    <div className="relative hidden lg:flex flex-1 items-end mt-6 min-h-[120px]">
-      <svg viewBox="0 0 420 120" className="w-full h-auto max-h-[180px]" aria-hidden>
-        <defs>
-          <linearGradient id="nn-grad" x1="0" x2="1">
-            <stop offset="0%" stopColor={from} />
-            <stop offset="100%" stopColor={to} />
-          </linearGradient>
-        </defs>
-        {edges.map((e) => (
-          <g key={e.k}>
-            <line x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke="url(#nn-grad)" strokeOpacity="0.16" strokeWidth="1" />
-            {e.k % 3 === 0 && (
-              <line
-                x1={e.x1}
-                y1={e.y1}
-                x2={e.x2}
-                y2={e.y2}
-                stroke="url(#nn-grad)"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                pathLength={100}
-                className="nn-pulse"
-                style={{ animationDelay: `${(e.k * 0.37) % 3}s` }}
-              />
-            )}
-          </g>
-        ))}
-        {LAYERS.map((ys, l) =>
-          ys.map((y, j) => (
-            <circle
-              key={`${l}-${j}`}
-              cx={COLS_X[l]}
-              cy={y}
-              r={l === LAYERS.length - 1 ? 7 : 5}
-              fill="#0A0F1C"
-              stroke={l === LAYERS.length - 1 ? to : from}
-              strokeWidth="1.6"
-              className="nn-node"
-              style={{ animationDelay: `${(l * 0.6 + j * 0.25) % 3}s` }}
-            />
-          ))
-        )}
-        <text x={COLS_X[3] + 14} y={64} fill={to} fontSize="10" fontFamily="ui-monospace, monospace" opacity="0.8">
-          output
-        </text>
-      </svg>
-    </div>
   );
 }
 
@@ -206,13 +132,12 @@ function DomainCard({ d, tools, i }: { d: Domain; tools: string[]; i: number }) 
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
-          className="relative flex flex-wrap gap-x-1.5 sm:gap-x-2 gap-y-3"
+          className="relative flex flex-wrap gap-x-1.5 gap-y-3"
         >
           {tools.map((t, k) => (
             <Tile key={t} name={t} i={k} />
           ))}
         </motion.div>
-        {d.net && <NeuralNet from={d.from} to={d.to} />}
       </div>
     </motion.div>
   );
@@ -229,7 +154,7 @@ export function Skills() {
       <div className="relative max-w-[1240px] mx-auto px-6 sm:px-10">
         <SectionHeading index="05" eyebrow="Skills" title="What I work with." accentFrom={2} />
 
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
           {DOMAINS.map((d, i) => (
             <DomainCard key={d.group} d={d} tools={tools[d.group] ?? []} i={i} />
           ))}

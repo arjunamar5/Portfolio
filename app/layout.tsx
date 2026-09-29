@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 

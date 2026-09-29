@@ -15,9 +15,14 @@ const C = {
   keys: "#2a3142",
   chair: "#2a3246",
   chairBase: "#3a4357",
-  skin: "#c68a5c",
-  skinShade: "#b27a4f",
-  hair: "#241812",
+  skin: "#cf9268",
+  skinShade: "#b77a52",
+  hair: "#17100c",
+  fade: "#2a211c",
+  beard: "#1d1511",
+  lip: "#9f5e4a",
+  sclera: "#f3eee8",
+  iris: "#2a190f",
   hoodie: "#3a4256",
   tee: "#f2f4f8",
   pants: "#1b2030",
@@ -116,7 +121,7 @@ export default function ProgrammerScene({
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(27, 1, 0.1, 60);
-    const target = new THREE.Vector3(0.0, 0.82, 0.12);
+    const target = new THREE.Vector3(0.0, 0.9, 0.12);
 
     const disposables: { dispose: () => void }[] = [];
     const track = <T extends { dispose: () => void }>(x: T) => (disposables.push(x), x);
@@ -378,43 +383,72 @@ export default function ProgrammerScene({
     add(torso, new THREE.CylinderGeometry(0.007, 0.007, 0.16, 6), M.tee, [-0.05, 0.47, 0.19], [0.1, 0, 0], false);
     add(torso, new THREE.CylinderGeometry(0.07, 0.075, 0.12, 14), M.skin, [0, 0.66, 0.02]);
 
-    // Head
-    const head = new THREE.Group();
-    head.position.set(0, 1.62, -0.12);
-    body.add(head);
-    const skull = add(head, new THREE.SphereGeometry(0.2, 32, 24), M.skin, [0, 0, 0]);
-    skull.scale.set(0.95, 1.06, 1);
-    for (const x of [0.068, -0.068]) {
-      add(head, new THREE.SphereGeometry(0.022, 12, 10), track(mat("#15100d", { roughness: 0.3 })), [x, 0.03, 0.178], [0, 0, 0], false);
-      add(head, rbox(0.065, 0.016, 0.02, 0.006), M.hair, [x, 0.088, 0.18], [0, 0, x > 0 ? -0.12 : 0.12], false);
-      const ear = add(head, new THREE.SphereGeometry(0.045, 12, 10), M.skin, [x > 0 ? 0.19 : -0.19, 0, 0]);
-      ear.scale.set(0.55, 1, 0.9);
-    }
-    add(head, new THREE.SphereGeometry(0.03, 12, 10), M.skinShade, [0, -0.012, 0.2], [0, 0, 0], false);
-    // Beard + moustache
-    const beard = add(head, new THREE.SphereGeometry(0.185, 24, 18), M.hair, [0, -0.085, 0.02]);
-    beard.scale.set(1.02, 0.72, 0.9);
-    const stache = add(head, new THREE.CapsuleGeometry(0.018, 0.07, 4, 8), M.hair, [0, -0.06, 0.188], [0, 0, Math.PI / 2], false);
-    stache.scale.set(1, 1, 0.8);
-    // Hair cap + twisted locks
-    const cap = add(head, new THREE.SphereGeometry(0.212, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.46), M.hair, [0, 0.02, -0.015], [-0.28, 0, 0]);
-    cap.castShadow = true;
-    const locks: THREE.Mesh[] = [];
-    for (let i = 0; i < 14; i++) {
-      const a = (i / 14) * Math.PI * 2;
-      const ring = i % 2 ? 0.1 : 0.15;
-      const lx = Math.cos(a) * ring;
-      const lz = Math.sin(a) * ring - 0.03;
-      const lock = add(head, new THREE.CapsuleGeometry(0.028, 0.1, 4, 8), M.hair, [lx, 0.2 - ring * 0.35, lz], [Math.sin(a) * 0.55 - 0.15, 0, -Math.cos(a) * 0.55]);
-      locks.push(lock);
-    }
-    // Headphones: band over the top, glowing cups
-    const band = add(head, new THREE.TorusGeometry(0.232, 0.02, 10, 40, Math.PI), M.phones, [0, 0.02, -0.02]);
-    band.rotation.set(0, 0, 0);
+    // Headphones resting around the neck (so the hair stays visible)
     const ringMat = track(new THREE.MeshBasicMaterial({ color: C.neon, toneMapped: false }));
-    for (const x of [0.225, -0.225]) {
-      add(head, new THREE.CylinderGeometry(0.075, 0.075, 0.05, 24), M.phones, [x, 0.0, -0.02], [0, 0, Math.PI / 2]);
-      add(head, new THREE.TorusGeometry(0.066, 0.008, 8, 28), ringMat, [x + (x > 0 ? 0.027 : -0.027), 0, -0.02], [0, Math.PI / 2, 0], false);
+    add(torso, new THREE.TorusGeometry(0.17, 0.018, 10, 40, Math.PI), M.phones, [0, 0.6, 0.0], [-Math.PI / 2, 0, 0]);
+    for (const x of [0.17, -0.17]) {
+      const cup = new THREE.Group();
+      cup.position.set(x, 0.57, 0.07);
+      cup.rotation.set(-0.7, 0, x > 0 ? -0.35 : 0.35);
+      torso.add(cup);
+      add(cup, new THREE.CylinderGeometry(0.07, 0.07, 0.045, 24), M.phones, [0, 0, 0]);
+      add(cup, new THREE.TorusGeometry(0.06, 0.008, 8, 28), ringMat, [0, 0.024, 0], [Math.PI / 2, 0, 0], false);
+    }
+
+    // Head — a stylised likeness: oval face, full groomed beard, thick brows, swept-up quiff
+    const head = new THREE.Group();
+    head.position.set(0, 1.7, -0.12);
+    head.scale.setScalar(1.38);
+    body.add(head);
+    const skull = add(head, new THREE.SphereGeometry(0.2, 40, 30), M.skin, [0, 0, 0]);
+    skull.scale.set(0.9, 1.12, 0.98);
+    const jaw = add(head, new THREE.SphereGeometry(0.17, 28, 20), M.skin, [0, -0.07, 0.03]);
+    jaw.scale.set(0.95, 0.85, 0.95);
+    const white = track(new THREE.MeshBasicMaterial({ color: "#ffffff" }));
+    for (const x of [0.066, -0.066]) {
+      const side = x > 0 ? 1 : -1;
+      // Almond eyes: sclera, dark iris, a catch-light and a soft lash line
+      const eye = add(head, new THREE.SphereGeometry(0.032, 20, 14), M.sclera, [x, 0.02, 0.166], [0, side * 0.3, 0], false);
+      eye.scale.set(1.25, 0.7, 0.55);
+      add(head, new THREE.SphereGeometry(0.0195, 16, 12), M.iris, [x * 0.97, 0.018, 0.181], [0, 0, 0], false);
+      add(head, new THREE.SphereGeometry(0.0055, 8, 6), white, [x * 0.92, 0.026, 0.198], [0, 0, 0], false);
+      add(head, new THREE.CapsuleGeometry(0.005, 0.05, 4, 8), M.hair, [x, 0.037, 0.183], [0, side * 0.3, Math.PI / 2 - side * 0.1], false);
+      // Thick, straight brows (a touch lower at the outer end — calm, not cross)
+      add(head, rbox(0.084, 0.02, 0.026, 0.009), M.hair, [x * 1.02, 0.084, 0.179], [0.1, side * 0.35, -side * 0.16], false);
+      // Ears
+      const ear = add(head, new THREE.SphereGeometry(0.045, 14, 10), M.skin, [side * 0.184, 0.0, -0.01]);
+      ear.scale.set(0.5, 1, 0.85);
+      // Sideburns joining the faded sides to the beard
+      add(head, rbox(0.022, 0.1, 0.055, 0.01), M.hair, [side * 0.179, 0.03, 0.03], [0, side * 0.3, 0]);
+      // Nostril wings
+      add(head, new THREE.SphereGeometry(0.015, 10, 8), M.skinShade, [side * 0.022, -0.033, 0.198], [0, 0, 0], false);
+    }
+    // Nose: bridge + rounded tip
+    add(head, new THREE.CapsuleGeometry(0.016, 0.04, 4, 10), M.skin, [0, 0.005, 0.198], [-0.35, 0, 0], false);
+    const tip = add(head, new THREE.SphereGeometry(0.026, 14, 12), M.skin, [0, -0.026, 0.21], [0, 0, 0], false);
+    tip.scale.set(1.08, 0.9, 0.9);
+    // Full beard: a shell covering cheeks and jaw up to the moustache line, plus a fuller chin
+    const beard = add(head, new THREE.SphereGeometry(0.207, 40, 18, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5), M.beard, [0, -0.02, 0.012], [0.25, 0, 0]);
+    beard.scale.set(0.97, 1.1, 1.0);
+    const chin = add(head, new THREE.SphereGeometry(0.064, 18, 14), M.beard, [0, -0.19, 0.105]);
+    chin.scale.set(1.35, 0.9, 1);
+    // Moustache over the lip, lower lip sitting on the beard
+    const stache = add(head, new THREE.CapsuleGeometry(0.014, 0.066, 4, 10), M.hair, [0, -0.063, 0.214], [0, 0, Math.PI / 2], false);
+    stache.scale.set(1, 1, 0.7);
+    add(head, new THREE.CapsuleGeometry(0.011, 0.032, 4, 8), M.lip, [0, -0.095, 0.214], [0, 0, Math.PI / 2], false);
+    // Hair: short faded sides/back fitted to the skull, then a smooth quiff swept up and back
+    const sides = add(head, new THREE.SphereGeometry(0.211, 40, 18, 0, Math.PI * 2, 0, Math.PI * 0.5), M.fade, [0, 0.05, -0.006], [-0.5, 0, 0]);
+    sides.scale.set(0.95, 1.08, 1);
+    sides.castShadow = true;
+    const QUIFF: [V3, V3, V3][] = [
+      // position, scale, rotation
+      [[0.0, 0.2, -0.01], [0.176, 0.09, 0.19], [-0.15, 0, 0]],
+      [[0.0, 0.232, 0.105], [0.152, 0.08, 0.095], [-0.5, 0, 0.05]],
+      [[-0.018, 0.262, 0.095], [0.11, 0.046, 0.08], [-0.3, 0, 0.12]],
+    ];
+    for (const [pos, sc, rot] of QUIFF) {
+      const q = add(head, new THREE.SphereGeometry(1, 32, 20), M.hair, pos, rot);
+      q.scale.set(...sc);
     }
 
     // Arms: shoulders → elbows → hands on the keyboard
@@ -489,7 +523,7 @@ export default function ProgrammerScene({
       // Camera: slow sway + pointer parallax around the desk.
       const az = 0.62 + (reduce ? 0 : Math.sin(t * 0.25) * 0.1) + mouseX * 0.18;
       const el = 0.4 + mouseY * 0.05;
-      const R = 9.6;
+      const R = 9.1;
       camera.position.set(target.x + Math.sin(az) * Math.cos(el) * R, target.y + Math.sin(el) * R, target.z + Math.cos(az) * Math.cos(el) * R);
       camera.lookAt(target);
 
@@ -499,8 +533,7 @@ export default function ProgrammerScene({
       // Head: look at a hovered thought, else follow the pointer; small nod while reading.
       const want = lookRef?.current ?? mouseX * 0.55;
       yaw += (want * 0.65 - yaw) * 0.06;
-      head.rotation.set(0.12 + Math.sin(t * 1.3) * 0.03, yaw, Math.sin(t * 0.7) * 0.02);
-      locks.forEach((l, i) => (l.rotation.z += Math.sin(t * 2 + i) * 0.0006));
+      head.rotation.set(0.08 + Math.sin(t * 1.3) * 0.03, yaw, Math.sin(t * 0.7) * 0.02);
 
       // Typing: hands tap alternately; elbows follow.
       const tapL = reduce ? 0 : Math.max(0, Math.sin(t * 13)) * 0.02;
@@ -532,7 +565,7 @@ export default function ProgrammerScene({
       });
       glyphs.forEach(({ sp, phase }, i) => {
         const a = t * 0.35 + phase;
-        sp.position.set(Math.cos(a) * 0.72, 2.05 + Math.sin(t * 1.1 + i) * 0.1, -0.12 + Math.sin(a) * 0.55);
+        sp.position.set(Math.cos(a) * 0.82, 2.42 + Math.sin(t * 1.1 + i) * 0.1, -0.12 + Math.sin(a) * 0.62);
         (sp.material as THREE.SpriteMaterial).opacity = 0.55 + Math.sin(t * 1.5 + i) * 0.25;
       });
       for (let i = 0; i < PCOUNT; i++) {

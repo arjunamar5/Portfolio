@@ -21,6 +21,8 @@ export interface ProjectCaseStudy {
   shortTitle: string;
   category: string;
   tagline: string;
+  /** Two or three plain lines on what the project does (used on the compact cards). */
+  summary?: string;
   description: string;
   confidentialityTag: "Private Client Project" | "Official Academic Project" | "Client Project";
   problemStatement?: string;
@@ -111,7 +113,7 @@ I enjoy exploring how different technologies come together to solve meaningful p
     {
       title: "Frontend",
       skills: [
-        { name: "HTML" }, { name: "CSS" }, { name: "React.js" }, { name: "Next.js" }, { name: "Tailwind CSS" }, { name: "Framer Motion" },
+        { name: "HTML" }, { name: "CSS" }, { name: "React.js" }, { name: "Next.js" }, { name: "Tailwind CSS" },
       ],
     },
     {
@@ -125,13 +127,13 @@ I enjoy exploring how different technologies come together to solve meaningful p
     {
       title: "AI-ML & GenAI",
       skills: [
-        { name: "YOLO" }, { name: "OpenCV" }, { name: "LLMs" }, { name: "RAG" }, { name: "Ollama" }, { name: "PyTorch" }, { name: "CNN" }, { name: "EfficientNet" }, { name: "U-Net" }, { name: "Grad-CAM" },
+        { name: "YOLO" }, { name: "OpenCV" }, { name: "LLMs" }, { name: "RAG" }, { name: "Ollama" }, { name: "PyTorch" },
       ],
     },
     {
       title: "Cloud Technologies",
       skills: [
-        { name: "AWS EC2" }, { name: "S3" }, { name: "API Gateway" }, { name: "CloudWatch" }, { name: "SNS" }, { name: "Docker" },
+        { name: "AWS" }, { name: "Docker" },
       ],
     },
     {
@@ -440,6 +442,7 @@ I enjoy exploring how different technologies come together to solve meaningful p
       shortTitle: "Residence Hub",
       category: "Residential Community Management",
       tagline: "Centralized apartment platform digitizing resident management, maintenance requests, complaint escalation, and billing ops.",
+      summary: "One app for apartment communities: maintenance tickets, digital gate passes and fee payments, tracked end to end.",
       description: "A modern property management platform that simplifies operations for gated communities, apartment complexes, and resident associations. Features maintenance ticket workflows, digital gate passes, maintenance fee ledgers, and resident communications.",
       confidentialityTag: "Private Client Project",
       problemStatement: "Apartment communities struggle with unorganized resident maintenance complaints, manual paper receipt maintenance tracking, delayed vendor resolution, and poor resident communication.",
@@ -491,6 +494,7 @@ I enjoy exploring how different technologies come together to solve meaningful p
       shortTitle: "QuickPark",
       category: "IoT & Hardware Automation Platform",
       tagline: "IoT parking system integrating ESP32 microcontrollers, IR sensors, servo barrier gates, and Flask web app for live slot booking.",
+      summary: "Smart parking with live free-slot detection, online booking and an ESP32 barrier gate that opens for booked cars.",
       description: "An end-to-end hardware-software smart parking solution. Combines physical ESP32 microcontrollers, infrared vehicle detection sensors, and automated servo barrier gates with a live Flask web dashboard for real-time slot monitoring, online booking, and dynamic tariff billing.",
       confidentialityTag: "Official Academic Project",
       problemStatement: "Urban parking facilities suffer from traffic congestion caused by drivers hunting for open spots, unauthorized parking, slow manual gate checking, and unmonitored revenue leakage.",
@@ -588,6 +592,7 @@ void sendSlotUpdate(int slotId, bool isOccupied) {
       shortTitle: "ITConnect",
       category: "Cloud-Native & Distributed Systems",
       tagline: "Scalable cloud platform for webinars, hackathons, and technical events deployed with microservices on AWS EC2 & Docker.",
+      summary: "A cloud platform for hackathons and webinars, run as Docker microservices on AWS so it stays up when traffic spikes.",
       description: "A high-concurrency cloud-native event hosting platform built for hackathons, webinars, technical workshops, and developer conferences. Deployed using containerized microservices on AWS infrastructure with automated health monitoring, load balancing, and secure cloud storage.",
       confidentialityTag: "Official Academic Project",
       problemStatement: "Traditional monolith event websites suffer severe downtime during peak hackathon registration launches and webinar streaming bursts, leading to database deadlocks and failed user signups.",

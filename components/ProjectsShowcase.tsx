@@ -133,7 +133,7 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
           <span className="text-xs text-dim">{project.sceneLabel}</span>
         </motion.div>
 
-        <motion.h3 variants={item} className="text-3xl sm:text-[2.6rem] font-semibold text-bone tracking-tight leading-[1.05]">
+        <motion.h3 variants={item} className="font-grotesk text-[2rem] sm:text-[2.8rem] font-bold text-bone tracking-[-0.02em] leading-[1.02]">
           {project.shortTitle}
           <span className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[3px] ml-2 align-baseline rotate-45" style={{ background: project.accent }} />
         </motion.h3>
@@ -149,7 +149,7 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
             <motion.div variants={item} className="mt-7 flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.2em] text-emerald-300">
               <TrendingUp className="w-3.5 h-3.5" /> The impact
             </motion.div>
-            <motion.p variants={item} className="mt-2 text-xl sm:text-2xl font-semibold text-bone leading-snug text-balance">
+            <motion.p variants={item} className="mt-2 font-grotesk text-xl sm:text-[1.6rem] font-medium text-bone leading-snug tracking-[-0.01em] text-balance">
               {impact.headline}
             </motion.p>
 
@@ -157,7 +157,7 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
               <motion.div variants={item} className="mt-6 grid grid-cols-3 gap-3">
                 {numeric.slice(0, 3).map((m) => (
                   <div key={m.label} className="rounded-xl border border-line bg-panel/60 px-3 py-3">
-                    <div className="text-2xl sm:text-3xl font-semibold tracking-tight" style={{ color: project.accent }}>
+                    <div className="font-grotesk text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: project.accent }}>
                       <Metric value={m.value} />
                     </div>
                     <div className="text-[11px] text-faint mt-1 leading-snug">{m.label}</div>
@@ -212,7 +212,7 @@ export function ProjectsShowcase() {
   const close = useCallback(() => setOpen(null), []);
 
   return (
-    <section id="work" className="relative pt-28 sm:pt-36 pb-28 sm:pb-36 border-t border-line">
+    <section id="work" className="relative pt-28 sm:pt-36 pb-28 sm:pb-36 border-t border-line font-jakarta">
       <div className="max-w-[1320px] mx-auto px-6 sm:px-10">
         <SectionHeading
           index="03"
@@ -240,7 +240,7 @@ export function ProjectsShowcase() {
             transition={{ duration: 0.6, ease: EASE }}
             className="eyebrow !text-faint mb-6"
           >
-            More projects · tap a card to see what it solves
+            More projects · tap a card for the full story
           </motion.h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {compact.map((project, i) => (

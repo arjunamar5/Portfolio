@@ -26,13 +26,6 @@ const ICON_MAP: Record<ProjectCaseStudy["visualType"], LucideIcon> = {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** First sentence of the problem statement — the one-line "what it solves". */
-function firstSentence(text?: string) {
-  if (!text) return "";
-  const m = text.match(/^(.+?[.!?])(\s|$)/);
-  return m ? m[1] : text;
-}
-
 export function ProjectCard({ project, index, onOpen }: { project: ProjectCaseStudy; index: number; onOpen: () => void }) {
   const Icon = ICON_MAP[project.visualType];
   const words = project.shortTitle.split(/\s+/);
@@ -121,24 +114,11 @@ export function ProjectCard({ project, index, onOpen }: { project: ProjectCaseSt
           </div>
 
           <div className="p-5 flex-1 flex flex-col">
-            <div className="text-[11px] mb-1.5" style={{ color: project.accent }}>
+            <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] mb-2" style={{ color: project.accent }}>
               {project.sceneLabel}
             </div>
-            <h3 className="text-base font-medium text-bone mb-3">{project.shortTitle}</h3>
-
-            {/* Problem → solution at a glance */}
-            <div className="space-y-2 mb-4">
-              <div className="rounded-lg border border-red-400/15 bg-red-500/[0.04] px-3 py-2">
-                <div className="font-mono text-[9px] uppercase tracking-wider text-red-300/80 mb-0.5">Solves</div>
-                <p className="text-xs text-dim leading-relaxed line-clamp-2">{firstSentence(project.problemStatement)}</p>
-              </div>
-              <div className="rounded-lg border px-3 py-2" style={{ borderColor: `${project.accent}33`, background: `${project.accent}0d` }}>
-                <div className="font-mono text-[9px] uppercase tracking-wider mb-0.5" style={{ color: project.accent }}>
-                  With
-                </div>
-                <p className="text-xs text-bone/85 leading-relaxed line-clamp-2">{project.tagline}</p>
-              </div>
-            </div>
+            <h3 className="font-grotesk text-xl font-bold tracking-[-0.01em] text-bone mb-2.5">{project.shortTitle}</h3>
+            <p className="text-[14px] leading-relaxed text-bone/70 mb-5 line-clamp-3">{project.summary ?? project.tagline}</p>
 
             <div className="flex flex-wrap gap-1.5 mb-4">
               {tags.map((t) => (

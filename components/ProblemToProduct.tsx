@@ -6,31 +6,19 @@ import { AlertTriangle, CheckCircle2, ArrowDown } from "lucide-react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-// Each real-world problem (from an actual project) and the solution it became.
+// The everyday problems I get handed — and what I turn them into.
 const PAIRS = [
-  { short: "Double-booked courts", problem: "Courts double-booked over phone calls", solution: "Real-time court blocking + WhatsApp booking", project: "CueCourtOS" },
-  { short: "Paper registers", problem: "Attendance & fees kept in paper registers", solution: "Automated attendance, fees & seating", project: "Perfect Study Space" },
-  { short: "Black-box AI", problem: "Black-box AI that doctors can't trust", solution: "Explainable Grad-CAM + local RAG insights", project: "Brain Tumor AI" },
-  { short: "Trip-planning overload", problem: "Trip planning feels overwhelming", solution: "Compass AI builds a personalized itinerary", project: "AlpenGlow Global" },
-  { short: "Circling for parking", problem: "Drivers circling for a free parking spot", solution: "Live IoT slot map with pre-booking", project: "QuickPark" },
+  { short: "Manual work", problem: "Hours lost to repetitive manual work", solution: "Automated billing, bookings & reminders", tag: "Automation" },
+  { short: "Scattered data", problem: "Data scattered across paper & spreadsheets", solution: "Full-stack apps on one clean database", tag: "Full-stack" },
+  { short: "Guesswork", problem: "Decisions made on guesswork", solution: "AI/ML models, analytics & RAG assistants", tag: "AI · ML" },
+  { short: "Clunky UX", problem: "Clunky ways to book, enquire or plan", solution: "Fast web & WhatsApp experiences", tag: "Frontend" },
+  { short: "Fragile systems", problem: "Systems that break when usage grows", solution: "Cloud deployments that scale", tag: "Cloud" },
 ];
 
 const ACTS = [
-  {
-    label: "Problem",
-    title: "It starts with a messy, real-world problem.",
-    sub: "Double bookings. Paper registers. Black-box AI. Too many choices.",
-  },
-  {
-    label: "Code",
-    title: "I untangle it — and engineer the fix in code.",
-    sub: "Model the data, automate the busywork, add AI where it truly helps.",
-  },
-  {
-    label: "Product",
-    title: "Out comes a product people actually use.",
-    sub: "Five real problems. Five shipped solutions.",
-  },
+  { label: "Understand", line: "Every project starts with the people affected — what's slow, manual or broken?" },
+  { label: "Build", line: "I design and build the fix end to end: interface, API, database — and AI where it genuinely helps." },
+  { label: "Ship", line: "Then I deploy it to the cloud, measure it, and keep improving it." },
 ];
 
 // Palette pairs: each particle travels from a warm "problem" hue to a cool "solution" hue.
@@ -72,20 +60,20 @@ const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 function computeLayout(W: number, H: number): Layout {
   const mobile = W < 768;
   if (mobile) {
-    const ch = 34;
-    const gap = 6;
+    const ch = 30;
+    const gap = 5;
     const y0 = H - 84 - (PAIRS.length * ch + (PAIRS.length - 1) * gap); // clear of the back-to-top button
     const cards = PAIRS.map((_, i) => ({ x: 16, y: y0 + i * (ch + gap), w: W - 32, h: ch }));
-    const core = { x: W * 0.5, y: y0 - 58 };
-    const zoneTop = Math.max(160, H * 0.07 + 110); // below the headline
-    const zoneBottom = core.y - 56;
+    const core = { x: W * 0.5, y: y0 - 56 };
+    const zoneTop = Math.max(176, H * 0.07 + 130); // below the headline
+    const zoneBottom = core.y - 50;
     const spacing = Math.min(44, (zoneBottom - zoneTop - 26) / (PAIRS.length - 1));
     const chaos = { cx: W * 0.5, cy: (zoneTop + zoneBottom) / 2, rx: W * 0.44, ry: (zoneBottom - zoneTop) / 2 + 12 };
     const slots = PAIRS.map((_, i) => ({ x: W * (i % 2 === 0 ? 0.3 : 0.7), y: zoneTop + 13 + i * spacing, rot: i % 2 ? 3 : -3 }));
     return { W, H, mobile, chaos, core, cards, slots };
   }
-  const chaos = { cx: W * 0.2, cy: H * 0.6, rx: Math.min(W * 0.15, 230), ry: H * 0.2 };
-  const core = { x: W * 0.47, y: H * 0.6 };
+  const chaos = { cx: W * 0.2, cy: H * 0.62, rx: Math.min(W * 0.15, 230), ry: H * 0.19 };
+  const core = { x: W * 0.47, y: H * 0.62 };
   const cw = Math.min(W * 0.36, 480);
   const ch = 50;
   const gap = 12;
@@ -654,33 +642,35 @@ export function ProblemToProduct() {
         <div className="pointer-events-none absolute inset-0 grid-bg opacity-40 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_55%,black,transparent_85%)]" />
         <canvas ref={canvasRef} aria-hidden className="absolute inset-0" />
 
-        {/* Headline — swaps per act */}
-        <div className="absolute inset-x-0 top-[7%] sm:top-[9%] z-10">
+        {/* Headline: what I do (constant) + the current step */}
+        <div className="absolute inset-x-0 top-[7%] sm:top-[8%] z-10">
           <div className="max-w-[1320px] mx-auto px-6 sm:px-10">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-[11px] text-accent-soft">03</span>
+              <span className="font-mono text-[11px] text-accent-soft">02</span>
               <span className="h-px w-10 bg-gradient-to-r from-accent to-neon" />
-              <span className="eyebrow !text-faint">Approach</span>
+              <span className="eyebrow !text-faint">What I do</span>
             </div>
-            <div className="relative mt-4 h-[5.5rem] sm:h-[7.5rem] max-w-3xl">
+            <h2 className="mt-3 sm:mt-4 max-w-3xl font-semibold text-[1.35rem] sm:text-5xl leading-[1.12] sm:leading-[1.08] tracking-tight text-bone text-balance">
+              I turn real-world problems into <span className="text-gradient">working software.</span>
+            </h2>
+            <div className="relative mt-3 h-6 sm:h-[3.25rem] max-w-2xl">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={act}
-                  initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+                  initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, y: -18, filter: "blur(8px)" }}
-                  transition={{ duration: 0.55, ease: EASE }}
-                  className="absolute inset-0"
+                  exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
+                  transition={{ duration: 0.45, ease: EASE }}
+                  className="absolute inset-0 flex items-start gap-3"
                 >
-                  <h2 className="font-semibold text-2xl sm:text-5xl leading-[1.08] tracking-tight text-bone text-balance">
-                    {ACTS[act].title.split(" ").map((w, i, arr) => (
-                      <span key={i} className={i >= arr.length - 2 ? (act === 0 ? "text-orange-400" : "text-gradient") : ""}>
-                        {w}
-                        {i < arr.length - 1 ? " " : ""}
-                      </span>
-                    ))}
-                  </h2>
-                  <p className="hidden sm:block text-dim mt-3">{ACTS[act].sub}</p>
+                  <span
+                    className={`shrink-0 mt-0.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.16em] ${
+                      act === 0 ? "border-orange-400/40 text-orange-300 bg-orange-400/10" : "border-accent/40 text-accent-soft bg-accent/10"
+                    }`}
+                  >
+                    {String(act + 1).padStart(2, "0")} · {ACTS[act].label}
+                  </span>
+                  <p className="hidden sm:block text-dim leading-relaxed">{ACTS[act].line}</p>
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -755,7 +745,7 @@ export function ProblemToProduct() {
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-neon" />
                 <span className="flex-1 min-w-0 text-[11px] sm:text-[13px] text-bone leading-tight truncate">{pair.solution}</span>
                 <span className="hidden sm:inline shrink-0 font-mono text-[10px] uppercase tracking-wider text-accent-soft/80">
-                  {pair.project}
+                  {pair.tag}
                 </span>
               </div>
             );
@@ -773,7 +763,7 @@ export function ProblemToProduct() {
                 onClick={goToWork}
                 className="btn-shine inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-soft transition-colors"
               >
-                See the work behind them <ArrowDown className="w-3.5 h-3.5" />
+                See it in real projects <ArrowDown className="w-3.5 h-3.5" />
               </motion.button>
             )}
           </AnimatePresence>

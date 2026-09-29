@@ -41,7 +41,7 @@ export function Research() {
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
         <div className="mb-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-end">
           <SectionHeading
-            index="05"
+            index="04"
             eyebrow="Research"
             title="Publications."
             lede={PORTFOLIO_DATA.personal.researchNote}

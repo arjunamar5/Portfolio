@@ -63,18 +63,6 @@ export interface TechEntry {
   label: string;
 }
 
-export interface JourneyStop {
-  id: string;
-  date: string;
-  kind: "education" | "research" | "leadership" | "project" | "work" | "next";
-  title: string;
-  place: string;
-  text?: string;
-  /** Links the stop to a project block / an experience entry. */
-  projectId?: string;
-  experienceId?: string;
-}
-
 export interface ResearchPaper {
   id: string;
   title: string;
@@ -652,17 +640,6 @@ void sendSlotUpdate(int slotId, bool isOccupied) {
       ]
     }
   ] as ProjectCaseStudy[],
-
-  journey: [
-    { id: "start", date: "Sept 2022", kind: "education", title: "Started B.Tech in Computer Science", place: "Amrita Vishwa Vidyapeetham", text: "Where it began — algorithms, systems, and the habit of building things that work." },
-    { id: "research", date: "During B.Tech", kind: "research", title: "8 research papers accepted / published", place: "Scopus-indexed conferences · IEEE & Springer", text: "From IoT smart parking and CPU scheduling to honeypots and ARM instruction validation." },
-    { id: "leadership", date: "During B.Tech", kind: "leadership", title: "President, Computer Society of India", place: "ASEB chapter", text: "Led the CSI team through technical events and coding competitions — delegation, coordination and teamwork." },
-    { id: "flagship", date: "Academic project", kind: "project", title: "Brain Tumor AI", place: "Official academic project", text: "Multimodal MRI analysis with explainable Grad-CAM and a local RAG clinical assistant.", projectId: "project-1-brain-tumor-detection" },
-    { id: "cue-court-coffee", date: "May – Jun 2026", kind: "work", title: "Full-Stack Developer · Cue Court Coffee", place: "Freelance", experienceId: "cue-court-coffee" },
-    { id: "perfect-study-space", date: "Jun – Jul 2026", kind: "work", title: "Full-Stack Developer · Perfect Study Space", place: "Freelance", experienceId: "perfect-study-space" },
-    { id: "graduated", date: "Aug 2026", kind: "education", title: "Graduated · CGPA 8.26", place: "B.Tech CSE, Amrita Vishwa Vidyapeetham", text: "Four years of coursework, research and real client work — wrapped up." },
-    { id: "next", date: "Next", kind: "next", title: "The next chapter", place: "Full-time roles & freelance projects", text: "Looking for a team where real problems become shipped products." },
-  ] as JourneyStop[],
 
   research: [
     {

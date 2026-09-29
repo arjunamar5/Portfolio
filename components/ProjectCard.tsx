@@ -5,6 +5,14 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 import { Brain, Home, ParkingCircle, Cloud, Compass, ArrowUpRight, LucideIcon } from "lucide-react";
 import { ProjectCaseStudy } from "@/data/portfolio-data";
 import { SpotlightCard, hexToRgb } from "./SpotlightCard";
+import { ResidenceMini, ParkMini, CloudMini } from "./MiniVisuals";
+
+/** Animated mini-template per project type (falls back to the icon tile). */
+const MINI: Partial<Record<ProjectCaseStudy["visualType"], React.ComponentType<{ accent: string }>>> = {
+  "residence-hub": ResidenceMini,
+  "quickpark-iot": ParkMini,
+  "cloud-aws": CloudMini,
+};
 
 const ICON_MAP: Record<ProjectCaseStudy["visualType"], LucideIcon> = {
   "mri-viewer": Brain,
@@ -34,6 +42,7 @@ export function ProjectCard({ project, index, onOpen }: { project: ProjectCaseSt
       : project.shortTitle.slice(0, 2).toUpperCase();
   const tags = project.techStack.flatMap((t) => t.items).slice(0, 4);
   const thumb = project.images?.[0];
+  const Mini = MINI[project.visualType];
 
   const ref = useRef<HTMLDivElement>(null);
   const rx = useMotionValue(0);
@@ -73,8 +82,10 @@ export function ProjectCard({ project, index, onOpen }: { project: ProjectCaseSt
           }}
           className="group card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:border-line-strong transition-colors duration-300"
         >
-          <div className="relative h-48 overflow-hidden">
-            {thumb ? (
+          <div className="relative h-48 overflow-hidden border-b border-line">
+            {Mini ? (
+              <Mini accent={project.accent} />
+            ) : thumb ? (
               <img
                 src={thumb}
                 alt={`${project.shortTitle} product screenshot`}

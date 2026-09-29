@@ -131,7 +131,7 @@ export function Skills() {
     <section id="stack" className="relative py-28 sm:py-36 border-t border-line overflow-hidden">
       <div className="max-w-[1180px] mx-auto px-6 sm:px-10 mb-16">
         <SectionHeading
-          index="06"
+          index="05"
           eyebrow="Skills"
           title="How the pieces connect."
           accentFrom={3}

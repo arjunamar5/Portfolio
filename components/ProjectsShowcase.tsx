@@ -1,24 +1,21 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
-import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
+import React, { useCallback, useState } from "react";
+import { motion } from "framer-motion";
+import { Briefcase, ArrowUpRight, GraduationCap } from "lucide-react";
 import { PORTFOLIO_DATA, ProjectCaseStudy } from "@/data/portfolio-data";
 import { MriVisual } from "./MriVisual";
 import { CourtVisual, StudyVisual, CompassVisual } from "./ProjectVisuals";
 import { ProjectCard } from "./ProjectCard";
 import { SectionHeading } from "./SectionHeading";
-import { CaseFile } from "./CaseFile";
+import { CaseCard } from "./CaseCard";
 import { CaseStudyModal } from "./CaseStudyModal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-// Explicit order: the resume's flagship AI project first, then the client platforms.
-const FEATURED_ORDER = [
-  "project-1-brain-tumor-detection",
-  "project-3-cue-court-coffee",
-  "project-7-alpenglow-global",
-  "project-2-perfect-study-space",
-];
+// Live client work first, then the academic flagship.
+const LIVE = ["project-3-cue-court-coffee", "project-2-perfect-study-space", "project-7-alpenglow-global"];
+const ACADEMIC = ["project-1-brain-tumor-detection"];
 
 /** Illustrative animated template for each featured project. */
 function ProjectVisual({ project }: { project: ProjectCaseStudy }) {
@@ -36,32 +33,35 @@ function ProjectVisual({ project }: { project: ProjectCaseStudy }) {
   }
 }
 
-/** Parallax + hover tilt around a project visual. */
-function VisualStage({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [30, -30]);
-  const rx = useMotionValue(0);
-  const ry = useMotionValue(0);
-  const srx = useSpring(rx, { stiffness: 150, damping: 20 });
-  const sry = useSpring(ry, { stiffness: 150, damping: 20 });
-
-  const onMove = (e: React.MouseEvent) => {
-    const r = ref.current?.getBoundingClientRect();
-    if (!r) return;
-    ry.set(((e.clientX - r.left) / r.width - 0.5) * 6);
-    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 6);
-  };
-
+function GroupLabel({ live, title, note }: { live?: boolean; title: string; note: string }) {
   return (
-    <div ref={ref} onMouseMove={onMove} onMouseLeave={() => (rx.set(0), ry.set(0))} className="[perspective:1400px]">
-      <motion.div style={{ y, rotateX: srx, rotateY: sry }}>{children}</motion.div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.8 }}
+      transition={{ duration: 0.6, ease: EASE }}
+      className="flex items-center gap-4 pt-16 sm:pt-20"
+    >
+      <span className="inline-flex items-center gap-2.5 rounded-full border border-line-strong bg-panel/70 px-4 py-2">
+        {live ? (
+          <span className="relative flex w-2 h-2">
+            <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+            <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-400" />
+          </span>
+        ) : (
+          <GraduationCap className="w-4 h-4 text-accent-soft" />
+        )}
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-bone">{title}</span>
+      </span>
+      <span className="h-px flex-1 bg-gradient-to-r from-line-strong to-transparent" />
+      <span className="hidden sm:inline text-xs text-faint">{note}</span>
+    </motion.div>
   );
 }
 
 function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStudy; index: number; onOpenCase: () => void }) {
-  const imageFirst = index % 2 === 0;
+  const role = PORTFOLIO_DATA.experience.find((e) => e.projectId === project.id);
+  const chips = project.chips ?? project.techStack.flatMap((t) => t.items).slice(0, 9);
   const item = {
     hidden: { opacity: 0, y: 22 },
     show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
@@ -70,26 +70,14 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
   return (
     <div
       id={project.id}
-      className="relative scroll-mt-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center py-16 sm:py-24 border-b border-line last:border-b-0"
+      className="relative scroll-mt-24 grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 lg:gap-14 items-start py-12 sm:py-16"
     >
-      <motion.div
-        initial={{ opacity: 0, x: imageFirst ? -60 : 60, scale: 0.96 }}
-        whileInView={{ opacity: 1, x: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 1, ease: EASE }}
-        className={`relative z-10 ${imageFirst ? "lg:order-1" : "lg:order-2"}`}
-      >
-        <VisualStage>
-          <ProjectVisual project={project} />
-        </VisualStage>
-      </motion.div>
-
       <motion.div
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}
         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
-        className={`relative ${imageFirst ? "lg:order-2" : "lg:order-1"}`}
+        className="lg:sticky lg:top-28"
       >
         <motion.div variants={item} className="flex flex-wrap items-center gap-2 mb-4">
           <span
@@ -107,13 +95,51 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
           {project.shortTitle}
           <span className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[3px] ml-2 align-baseline rotate-45" style={{ background: project.accent }} />
         </motion.h3>
-        <motion.p variants={item} className="text-bone/75 text-base sm:text-lg mt-4 mb-7 leading-relaxed">
+
+        {role && (
+          <motion.div variants={item} className="mt-3 inline-flex items-center gap-2 text-sm text-dim">
+            <Briefcase className="w-4 h-4" style={{ color: project.accent }} />
+            {role.role} <span className="text-faint">· {role.period}</span>
+          </motion.div>
+        )}
+
+        <motion.p variants={item} className="text-bone/80 text-base sm:text-lg mt-4 leading-relaxed">
           {project.tagline}
         </motion.p>
+        <motion.p variants={item} className="text-sm text-dim mt-4 leading-relaxed">
+          {project.description}
+        </motion.p>
 
-        <motion.div variants={item}>
-          <CaseFile project={project} onOpenCase={project.architectureOverview ? onOpenCase : undefined} />
+        <motion.div variants={item} className="flex flex-wrap gap-1.5 mt-6">
+          {chips.map((c) => (
+            <span key={c} className="text-[11px] text-dim rounded-md px-2 py-1 border border-line bg-void/50">
+              {c}
+            </span>
+          ))}
         </motion.div>
+
+        {project.architectureOverview && (
+          <motion.button
+            variants={item}
+            onClick={onOpenCase}
+            className="group mt-7 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm text-bone transition-colors hover:bg-panel-2"
+            style={{ borderColor: `${project.accent}66` }}
+          >
+            Open the full case study
+            <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: project.accent }} />
+          </motion.button>
+        )}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 50, scale: 0.97 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.1 }}
+        transition={{ duration: 1, ease: EASE }}
+      >
+        <CaseCard project={project}>
+          <ProjectVisual project={project} />
+        </CaseCard>
       </motion.div>
     </div>
   );
@@ -121,9 +147,9 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
 
 export function ProjectsShowcase() {
   const projects = PORTFOLIO_DATA.projects;
-  const featured = FEATURED_ORDER.map((id) => projects.find((p) => p.id === id)).filter(
-    (p): p is ProjectCaseStudy => Boolean(p)
-  );
+  const pick = (ids: string[]) => ids.map((id) => projects.find((p) => p.id === id)).filter((p): p is ProjectCaseStudy => Boolean(p));
+  const live = pick(LIVE);
+  const academic = pick(ACADEMIC);
   const compact = projects.filter((p) => !p.featured);
   const [open, setOpen] = useState<ProjectCaseStudy | null>(null);
   const close = useCallback(() => setOpen(null), []);
@@ -132,18 +158,22 @@ export function ProjectsShowcase() {
     <section id="work" className="relative pt-28 sm:pt-36 pb-28 sm:pb-36 border-t border-line">
       <div className="max-w-[1320px] mx-auto px-6 sm:px-10">
         <SectionHeading
-          index="04"
+          index="03"
           eyebrow="Projects"
           title="Selected work."
           accentFrom={1}
-          lede="From explainable medical AI to production platforms running real businesses."
+          lede="Each one starts with a real problem. Here's what I built — and what changed because of it."
         />
 
-        <div className="mt-4">
-          {featured.map((project, i) => (
-            <FeaturedBlock key={project.id} project={project} index={i} onOpenCase={() => setOpen(project)} />
-          ))}
-        </div>
+        <GroupLabel live title="Live projects" note="Built for — and used by — real clients" />
+        {live.map((project, i) => (
+          <FeaturedBlock key={project.id} project={project} index={i} onOpenCase={() => setOpen(project)} />
+        ))}
+
+        <GroupLabel title="Academic project" note="Research-grade AI built at university" />
+        {academic.map((project, i) => (
+          <FeaturedBlock key={project.id} project={project} index={live.length + i} onOpenCase={() => setOpen(project)} />
+        ))}
 
         <div className="pt-20 sm:pt-24">
           <motion.h3

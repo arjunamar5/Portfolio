@@ -38,7 +38,7 @@ export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
       <div className="relative max-w-[720px] mx-auto px-6 sm:px-10 text-center">
         <div className="mb-12">
           <SectionHeading
-            index="07"
+            index="06"
             eyebrow="Contact"
             title="Let's work together."
             accentFrom={2}

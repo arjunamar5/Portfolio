@@ -6,8 +6,7 @@ import { motion } from "framer-motion";
 const CHAPTERS = [
   { id: "home", label: "Intro" },
   { id: "about", label: "About" },
-  { id: "journey", label: "Journey" },
-  { id: "approach", label: "Approach" },
+  { id: "approach", label: "What I do" },
   { id: "work", label: "Work" },
   { id: "research", label: "Research" },
   { id: "stack", label: "Skills" },

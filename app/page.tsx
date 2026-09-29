@@ -4,7 +4,6 @@ import React, { useCallback, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
-import { Journey } from "@/components/Journey";
 import { TourRail } from "@/components/TourRail";
 import { ProblemToProduct } from "@/components/ProblemToProduct";
 import { ProjectsShowcase } from "@/components/ProjectsShowcase";
@@ -33,7 +32,6 @@ export default function Home() {
 
       <Hero onOpenResume={openResume} ready={ready} />
       <About />
-      <Journey />
       <ProblemToProduct />
       <ProjectsShowcase />
       <Research />

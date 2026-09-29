@@ -145,28 +145,6 @@ function CodeCard({ ready }: { ready: boolean }) {
           </pre>
         </div>
 
-        {/* Floating chips orbiting the card, lifted in 3D. */}
-        {[
-          { label: "RAG · Ollama", cls: "-top-5 -left-8", delay: 1.4, dur: 6 },
-          { label: "8 papers · IEEE & Springer", cls: "-bottom-6 left-10", delay: 1.6, dur: 7 },
-          { label: "AWS · Docker", cls: "top-16 -right-8", delay: 1.8, dur: 5.5 },
-        ].map((chip) => (
-          <motion.div
-            key={chip.label}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={ready ? { opacity: 1, scale: 1, y: [0, -10, 0] } : {}}
-            transition={{
-              opacity: { duration: 0.5, delay: chip.delay },
-              scale: { duration: 0.5, delay: chip.delay, ease: EASE },
-              y: { duration: chip.dur, repeat: Infinity, ease: "easeInOut", delay: chip.delay },
-            }}
-            style={{ transform: "translateZ(40px)" }}
-            className={`absolute ${chip.cls} glass rounded-full px-3.5 py-1.5 text-xs text-bone shadow-glow-sm flex items-center gap-2`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-neon shadow-[0_0_8px_#22D3EE]" />
-            {chip.label}
-          </motion.div>
-        ))}
       </motion.div>
     </motion.div>
   );

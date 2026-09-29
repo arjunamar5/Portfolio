@@ -48,12 +48,31 @@ export interface ProjectCaseStudy {
   images?: string[];
   /** Pill tags shown under a featured project; defaults to its tech stack. */
   chips?: string[];
+  /** What changed for the people using it — shown as a before/after board. */
+  impact?: {
+    headline: string;
+    rows: { area: string; before: string; after: string }[];
+    /** Optional relative growth bar (e.g. enquiries before vs after). */
+    growth?: { label: string; before: number; after: number; note: string };
+  };
 }
 
 export interface TechEntry {
   name: string;
   icon: string;
   label: string;
+}
+
+export interface JourneyStop {
+  id: string;
+  date: string;
+  kind: "education" | "research" | "leadership" | "project" | "work" | "next";
+  title: string;
+  place: string;
+  text?: string;
+  /** Links the stop to a project block / an experience entry. */
+  projectId?: string;
+  experienceId?: string;
 }
 
 export interface ResearchPaper {
@@ -208,6 +227,15 @@ I enjoy exploring how different technologies come together to solve meaningful p
         { label: "Explainable predictions", value: "Grad-CAM" },
         { label: "Local RAG assistant", value: "Ollama" }
       ],
+      impact: {
+        headline: "From a black-box guess to an explainable, private second opinion.",
+        rows: [
+          { area: "Explainability", before: "Black-box prediction", after: "Grad-CAM heatmap shows why" },
+          { area: "Workflow", before: "Separate tool per task", after: "One pipeline: classify → segment" },
+          { area: "Privacy", before: "Scans sent to cloud AI", after: "Runs fully local on Ollama" },
+          { area: "Context", before: "Manual literature lookup", after: "RAG answers in plain language" }
+        ]
+      },
       codeSnippet: {
         title: "Grad_CAM_Explainer.py",
         language: "python",
@@ -301,6 +329,16 @@ I enjoy exploring how different technologies come together to solve meaningful p
         { label: "Student profiles", value: "300+" },
         { label: "Daily enquiries", value: "+50%" }
       ],
+      impact: {
+        headline: "Three branches, one system — and 50% more enquiries every day.",
+        rows: [
+          { area: "Operations", before: "Branches run separately", after: "One platform, 3 branches" },
+          { area: "Records", before: "Paper logbooks", after: "300+ profiles, centralized" },
+          { area: "Admin", before: "Manual fees & seating", after: "Automated end-to-end" },
+          { area: "Enquiries", before: "Walk-ins & calls", after: "+50% daily via website" }
+        ],
+        growth: { label: "Daily student enquiries", before: 100, after: 150, note: "after the new website launched" }
+      },
       visualType: "study-saas",
       accent: "#38BDF8",
       sceneLabel: "Multi-Tenant SaaS",
@@ -352,6 +390,15 @@ I enjoy exploring how different technologies come together to solve meaningful p
         { label: "Court blocking", value: "Real-time" },
         { label: "AI analytics assistant", value: "CueBot" }
       ],
+      impact: {
+        headline: "Bookings, billing and business insight — now on autopilot.",
+        rows: [
+          { area: "Bookings", before: "Phone calls & notebooks", after: "Automated on WhatsApp" },
+          { area: "Court slots", before: "Double-booking risk", after: "Blocked in real time" },
+          { area: "Billing", before: "Manual tab tallying", after: "Auto-billed with add-ons" },
+          { area: "Insights", before: "No live view", after: "Instant answers from CueBot" }
+        ]
+      },
       visualType: "court-booking",
       accent: "#D97A52",
       sceneLabel: "Venue Platform",
@@ -383,11 +430,21 @@ I enjoy exploring how different technologies come together to solve meaningful p
         { title: "Destination collections", description: "Curated destinations and packages to explore." },
         { title: "Lead routing to sales", description: "Trip requests handed straight to the sales team." }
       ],
+      problemStatement: "Turning a vague travel idea into a real itinerary is slow and overwhelming — too many destinations, budgets, dates and travel styles to weigh before anyone talks to an agent.",
       impactMetrics: [
         { label: "Destination collections", value: "4" },
         { label: "Curated packages", value: "6+" },
         { label: "Industry recognitions", value: "4" }
       ],
+      impact: {
+        headline: "From a vague idea to a ready itinerary — and a warm lead for sales.",
+        rows: [
+          { area: "Discovery", before: "Endless browsing", after: "Compass suggests where to go" },
+          { area: "Planning", before: "Scattered requirements", after: "Budget, dates & style in one flow" },
+          { area: "Itinerary", before: "Built by hand, later", after: "Personalized plan, instantly" },
+          { area: "Sales", before: "Enquiries handled ad hoc", after: "Leads routed to sales" }
+        ]
+      },
       visualType: "travel-concierge",
       accent: "#FB923C",
       sceneLabel: "Travel · AI Concierge",
@@ -595,6 +652,17 @@ void sendSlotUpdate(int slotId, bool isOccupied) {
       ]
     }
   ] as ProjectCaseStudy[],
+
+  journey: [
+    { id: "start", date: "Sept 2022", kind: "education", title: "Started B.Tech in Computer Science", place: "Amrita Vishwa Vidyapeetham", text: "Where it began — algorithms, systems, and the habit of building things that work." },
+    { id: "research", date: "During B.Tech", kind: "research", title: "8 research papers accepted / published", place: "Scopus-indexed conferences · IEEE & Springer", text: "From IoT smart parking and CPU scheduling to honeypots and ARM instruction validation." },
+    { id: "leadership", date: "During B.Tech", kind: "leadership", title: "President, Computer Society of India", place: "ASEB chapter", text: "Led the CSI team through technical events and coding competitions — delegation, coordination and teamwork." },
+    { id: "flagship", date: "Academic project", kind: "project", title: "Brain Tumor AI", place: "Official academic project", text: "Multimodal MRI analysis with explainable Grad-CAM and a local RAG clinical assistant.", projectId: "project-1-brain-tumor-detection" },
+    { id: "cue-court-coffee", date: "May – Jun 2026", kind: "work", title: "Full-Stack Developer · Cue Court Coffee", place: "Freelance", experienceId: "cue-court-coffee" },
+    { id: "perfect-study-space", date: "Jun – Jul 2026", kind: "work", title: "Full-Stack Developer · Perfect Study Space", place: "Freelance", experienceId: "perfect-study-space" },
+    { id: "graduated", date: "Aug 2026", kind: "education", title: "Graduated · CGPA 8.26", place: "B.Tech CSE, Amrita Vishwa Vidyapeetham", text: "Four years of coursework, research and real client work — wrapped up." },
+    { id: "next", date: "Next", kind: "next", title: "The next chapter", place: "Full-time roles & freelance projects", text: "Looking for a team where real problems become shipped products." },
+  ] as JourneyStop[],
 
   research: [
     {

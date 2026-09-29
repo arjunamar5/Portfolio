@@ -11,7 +11,7 @@ interface NavbarProps {
 const LINKS = [
   { id: "home", label: "Home" },
   { id: "about", label: "About" },
-  { id: "experience", label: "Experience" },
+  { id: "journey", label: "Journey" },
   { id: "work", label: "Projects" },
   { id: "research", label: "Research" },
   { id: "stack", label: "Skills" },

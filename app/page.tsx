@@ -4,7 +4,8 @@ import React, { useCallback, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
-import { Experience } from "@/components/Experience";
+import { Journey } from "@/components/Journey";
+import { TourRail } from "@/components/TourRail";
 import { ProblemToProduct } from "@/components/ProblemToProduct";
 import { ProjectsShowcase } from "@/components/ProjectsShowcase";
 import { Research } from "@/components/Research";
@@ -28,10 +29,11 @@ export default function Home() {
       <CursorFx />
       <ScrollProgress />
       <Navbar onOpenResume={openResume} />
+      <TourRail />
 
       <Hero onOpenResume={openResume} ready={ready} />
       <About />
-      <Experience />
+      <Journey />
       <ProblemToProduct />
       <ProjectsShowcase />
       <Research />

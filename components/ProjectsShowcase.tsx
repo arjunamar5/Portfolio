@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import { PORTFOLIO_DATA, ProjectCaseStudy } from "@/data/portfolio-data";
 import { MriVisual } from "./MriVisual";
 import { CourtVisual, StudyVisual, CompassVisual } from "./ProjectVisuals";
 import { ProjectCard } from "./ProjectCard";
 import { SectionHeading } from "./SectionHeading";
-import { CountUp } from "./CountUp";
+import { CaseFile } from "./CaseFile";
+import { CaseStudyModal } from "./CaseStudyModal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -35,13 +36,6 @@ function ProjectVisual({ project }: { project: ProjectCaseStudy }) {
   }
 }
 
-/** "300+" → count-up 300 with "+" suffix; non-numeric values render as-is. */
-function MetricValue({ value }: { value: string }) {
-  const m = value.match(/^([+]?)(\d+(?:\.\d+)?)(.*)$/);
-  if (!m) return <>{value}</>;
-  return <CountUp value={parseFloat(m[2])} prefix={m[1]} suffix={m[3]} />;
-}
-
 /** Parallax + hover tilt around a project visual. */
 function VisualStage({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -66,12 +60,8 @@ function VisualStage({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FeaturedBlock({ project, index }: { project: ProjectCaseStudy; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
+function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStudy; index: number; onOpenCase: () => void }) {
   const imageFirst = index % 2 === 0;
-  const chips = project.chips ?? project.techStack.flatMap((t) => t.items).slice(0, 9);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const watermarkX = useTransform(scrollYProgress, [0, 1], imageFirst ? [60, -60] : [-60, 60]);
   const item = {
     hidden: { opacity: 0, y: 22 },
     show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
@@ -79,9 +69,8 @@ function FeaturedBlock({ project, index }: { project: ProjectCaseStudy; index: n
 
   return (
     <div
-      ref={ref}
       id={project.id}
-      className="relative scroll-mt-24 grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-16 items-center py-16 sm:py-24 border-b border-line last:border-b-0"
+      className="relative scroll-mt-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center py-16 sm:py-24 border-b border-line last:border-b-0"
     >
       <motion.div
         initial={{ opacity: 0, x: imageFirst ? -60 : 60, scale: 0.96 }}
@@ -98,67 +87,33 @@ function FeaturedBlock({ project, index }: { project: ProjectCaseStudy; index: n
       <motion.div
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.25 }}
+        viewport={{ once: true, amount: 0.2 }}
         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
         className={`relative ${imageFirst ? "lg:order-2" : "lg:order-1"}`}
       >
-        {/* Oversized outlined name drifting behind the copy. */}
-        <motion.span
-          aria-hidden
-          style={{ x: watermarkX, WebkitTextStroke: `1px ${project.accent}26` }}
-          className="pointer-events-none select-none absolute -top-10 left-0 text-[7rem] sm:text-[10rem] font-semibold leading-none tracking-tighter text-transparent whitespace-nowrap"
-        >
-          {project.shortTitle.split(" ")[0]}
-        </motion.span>
-
-        <motion.div variants={item} className="relative flex items-center gap-2.5 font-mono text-[11px] tracking-[0.18em] uppercase mb-4" style={{ color: project.accent }}>
-          <span>{String(index + 1).padStart(2, "0")}</span>
-          <span className="w-5 h-px" style={{ background: project.accent }} />
-          <span>{project.sceneLabel}</span>
-          <span className="ml-1 text-faint tracking-wider normal-case font-sans text-[10px] border border-line rounded-full px-2 py-0.5">
-            {project.confidentialityTag}
+        <motion.div variants={item} className="flex flex-wrap items-center gap-2 mb-4">
+          <span
+            className="inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[11px] text-bone"
+            style={{ borderColor: `${project.accent}66`, background: `${project.accent}14` }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: project.accent, boxShadow: `0 0 10px ${project.accent}` }} />
+            Case {String(index + 1).padStart(2, "0")}
           </span>
+          <span className="text-xs text-dim">{project.sceneLabel}</span>
+          <span className="text-xs text-faint">· {project.confidentialityTag}</span>
         </motion.div>
 
-        <motion.h3 variants={item} className="relative text-3xl sm:text-5xl font-semibold text-bone tracking-tight mb-4">
+        <motion.h3 variants={item} className="text-3xl sm:text-[2.75rem] font-semibold text-bone tracking-tight leading-[1.05]">
           {project.shortTitle}
+          <span className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[3px] ml-2 align-baseline rotate-45" style={{ background: project.accent }} />
         </motion.h3>
-        <motion.p variants={item} className="relative text-bone/80 text-base sm:text-lg mb-4 leading-relaxed">
+        <motion.p variants={item} className="text-bone/75 text-base sm:text-lg mt-4 mb-7 leading-relaxed">
           {project.tagline}
         </motion.p>
-        <motion.p variants={item} className="relative text-sm text-dim leading-relaxed mb-6">
-          {project.description}
-        </motion.p>
 
-        <motion.div variants={item} className="relative flex flex-wrap gap-2 mb-8">
-          {chips.map((t) => (
-            <span
-              key={t}
-              className="text-xs text-dim border border-line-strong rounded-full px-3 py-1.5 bg-void/40 hover:text-bone transition-colors"
-            >
-              {t}
-            </span>
-          ))}
+        <motion.div variants={item}>
+          <CaseFile project={project} onOpenCase={project.architectureOverview ? onOpenCase : undefined} />
         </motion.div>
-
-        <motion.dl variants={item} className="relative grid grid-cols-3 gap-4 sm:gap-6 border-t border-line pt-5">
-          {project.impactMetrics.slice(0, 3).map((m, mi) => (
-            <div key={m.label} className="relative">
-              <motion.span
-                initial={{ scaleX: 0 }}
-                whileInView={{ scaleX: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.3 + mi * 0.12, ease: EASE }}
-                className="absolute -top-[21px] left-0 w-9 h-[2px] origin-left"
-                style={{ background: project.accent, boxShadow: `0 0 10px ${project.accent}` }}
-              />
-              <dd className="text-2xl sm:text-4xl font-semibold text-bone tracking-tight leading-none">
-                <MetricValue value={m.value} />
-              </dd>
-              <dt className="text-[11px] sm:text-xs text-faint mt-2 leading-snug">{m.label}</dt>
-            </div>
-          ))}
-        </motion.dl>
       </motion.div>
     </div>
   );
@@ -170,6 +125,8 @@ export function ProjectsShowcase() {
     (p): p is ProjectCaseStudy => Boolean(p)
   );
   const compact = projects.filter((p) => !p.featured);
+  const [open, setOpen] = useState<ProjectCaseStudy | null>(null);
+  const close = useCallback(() => setOpen(null), []);
 
   return (
     <section id="work" className="relative pt-28 sm:pt-36 pb-28 sm:pb-36 border-t border-line">
@@ -184,7 +141,7 @@ export function ProjectsShowcase() {
 
         <div className="mt-4">
           {featured.map((project, i) => (
-            <FeaturedBlock key={project.id} project={project} index={i} />
+            <FeaturedBlock key={project.id} project={project} index={i} onOpenCase={() => setOpen(project)} />
           ))}
         </div>
 
@@ -196,15 +153,16 @@ export function ProjectsShowcase() {
             transition={{ duration: 0.6, ease: EASE }}
             className="eyebrow !text-faint mb-6"
           >
-            More projects
+            More projects · tap a card to see what it solves
           </motion.h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {compact.map((project, i) => (
-              <ProjectCard key={project.id} project={project} index={i} />
+              <ProjectCard key={project.id} project={project} index={i} onOpen={() => setOpen(project)} />
             ))}
           </div>
         </div>
       </div>
+      <CaseStudyModal project={open} onClose={close} />
     </section>
   );
 }

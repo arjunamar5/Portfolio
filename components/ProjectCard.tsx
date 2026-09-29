@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import { Brain, Home, ParkingCircle, Cloud, Compass, LucideIcon } from "lucide-react";
+import { Brain, Home, ParkingCircle, Cloud, Compass, ArrowUpRight, LucideIcon } from "lucide-react";
 import { ProjectCaseStudy } from "@/data/portfolio-data";
 import { SpotlightCard, hexToRgb } from "./SpotlightCard";
 
@@ -18,7 +18,14 @@ const ICON_MAP: Record<ProjectCaseStudy["visualType"], LucideIcon> = {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export function ProjectCard({ project, index }: { project: ProjectCaseStudy; index: number }) {
+/** First sentence of the problem statement — the one-line "what it solves". */
+function firstSentence(text?: string) {
+  if (!text) return "";
+  const m = text.match(/^(.+?[.!?])(\s|$)/);
+  return m ? m[1] : text;
+}
+
+export function ProjectCard({ project, index, onOpen }: { project: ProjectCaseStudy; index: number; onOpen: () => void }) {
   const Icon = ICON_MAP[project.visualType];
   const words = project.shortTitle.split(/\s+/);
   const monogram =
@@ -54,7 +61,17 @@ export function ProjectCard({ project, index }: { project: ProjectCaseStudy; ind
       <motion.div style={{ rotateX: srx, rotateY: sry, ["--accent" as any]: project.accent }} className="h-full">
         <SpotlightCard
           rgb={hexToRgb(project.accent)}
-          className="group card rounded-2xl overflow-hidden h-full hover:border-line-strong transition-colors duration-300"
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${project.shortTitle} case study`}
+          onClick={onOpen}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onOpen();
+            }
+          }}
+          className="group card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:border-line-strong transition-colors duration-300"
         >
           <div className="relative h-48 overflow-hidden">
             {thumb ? (
@@ -92,19 +109,38 @@ export function ProjectCard({ project, index }: { project: ProjectCaseStudy; ind
             )}
           </div>
 
-          <div className="p-5">
+          <div className="p-5 flex-1 flex flex-col">
             <div className="text-[11px] mb-1.5" style={{ color: project.accent }}>
               {project.sceneLabel}
             </div>
-            <h3 className="text-base font-medium text-bone mb-2">{project.shortTitle}</h3>
-            <p className="text-sm text-dim leading-relaxed mb-4 line-clamp-3">{project.tagline}</p>
-            <div className="flex flex-wrap gap-1.5">
+            <h3 className="text-base font-medium text-bone mb-3">{project.shortTitle}</h3>
+
+            {/* Problem → solution at a glance */}
+            <div className="space-y-2 mb-4">
+              <div className="rounded-lg border border-red-400/15 bg-red-500/[0.04] px-3 py-2">
+                <div className="font-mono text-[9px] uppercase tracking-wider text-red-300/80 mb-0.5">Solves</div>
+                <p className="text-xs text-dim leading-relaxed line-clamp-2">{firstSentence(project.problemStatement)}</p>
+              </div>
+              <div className="rounded-lg border px-3 py-2" style={{ borderColor: `${project.accent}33`, background: `${project.accent}0d` }}>
+                <div className="font-mono text-[9px] uppercase tracking-wider mb-0.5" style={{ color: project.accent }}>
+                  With
+                </div>
+                <p className="text-xs text-bone/85 leading-relaxed line-clamp-2">{project.tagline}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mb-4">
               {tags.map((t) => (
                 <span key={t} className="text-xs text-faint border border-line rounded-full px-2.5 py-1">
                   {t}
                 </span>
               ))}
             </div>
+
+            <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-medium transition-colors group-hover:text-bone" style={{ color: project.accent }}>
+              Explore case study
+              <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
           </div>
         </SpotlightCard>
       </motion.div>

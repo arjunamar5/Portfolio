@@ -135,8 +135,10 @@ function roundedRectPoints(r: Rect, radius: number, count: number) {
 }
 
 type Particle = {
-  cx: number; cy: number; // chaos home
-  tx: number; ty: number; // ordered target
+  glyph: number; // index of the idea-glyph cluster this particle sketches, or -1 for the free nebula
+  lx: number; ly: number; // offset within its glyph
+  ox: number; oy: number; oz: number; // offset within the nebula (3D)
+  tx: number; ty: number; // target on its card, in the card's flat (screen) plane
   card: number;
   delay: number;
   a1: number; a2: number; f1: number; f2: number; p1: number; p2: number;
@@ -144,7 +146,65 @@ type Particle = {
   size: number;
 };
 
-function buildParticles(L: Layout): Particle[] {
+type Glyph = { cx: number; cy: number; cz: number; phase: number; spin: number };
+
+// Rough ideas & open questions the swarm sketches before anything is built.
+const GLYPH_KINDS = ["?", "bulb", "!", "{ }", "bulb"];
+
+/** Rasterizes a glyph off-screen and returns its filled pixels as centred offsets. */
+function sampleGlyph(kind: string, size: number): [number, number][] {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const g = c.getContext("2d");
+  if (!g) return [];
+  g.fillStyle = "#fff";
+  g.strokeStyle = "#fff";
+  g.lineCap = "round";
+  if (kind === "bulb") {
+    const r = size * 0.27;
+    const cx = size / 2;
+    const cy = size * 0.4;
+    g.lineWidth = size * 0.075;
+    g.beginPath();
+    g.arc(cx, cy, r, Math.PI * 0.78, Math.PI * 2.22);
+    g.stroke();
+    g.beginPath();
+    g.moveTo(cx - r * 0.62, cy + r * 0.78);
+    g.lineTo(cx - r * 0.45, cy + r * 1.3);
+    g.lineTo(cx + r * 0.45, cy + r * 1.3);
+    g.lineTo(cx + r * 0.62, cy + r * 0.78);
+    g.stroke();
+    g.fillRect(cx - r * 0.42, cy + r * 1.5, r * 0.84, size * 0.055);
+    g.fillRect(cx - r * 0.28, cy + r * 1.78, r * 0.56, size * 0.055);
+    g.lineWidth = size * 0.045;
+    g.beginPath();
+    g.moveTo(cx - r * 0.35, cy + r * 0.25);
+    g.lineTo(cx - r * 0.12, cy - r * 0.2);
+    g.lineTo(cx + r * 0.12, cy + r * 0.25);
+    g.lineTo(cx + r * 0.35, cy - r * 0.2);
+    g.stroke();
+  } else {
+    g.font = `700 ${Math.round(size * (kind.length > 1 ? 0.6 : 0.86))}px ui-sans-serif, system-ui, sans-serif`;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(kind, size / 2, size / 2 + size * 0.04);
+  }
+  const data = g.getImageData(0, 0, size, size).data;
+  const step = Math.max(2, Math.round(size / 30));
+  const pts: [number, number][] = [];
+  for (let y = 0; y < size; y += step)
+    for (let x = 0; x < size; x += step) if (data[(y * size + x) * 4 + 3] > 140) pts.push([x - size / 2, y - size / 2]);
+  return pts;
+}
+
+function buildGlyphs(L: Layout): Glyph[] {
+  const spots = L.mobile
+    ? [[-0.62, -0.35, -40], [0.55, -0.25, 30], [0.02, 0.2, 0], [-0.5, 0.75, 50], [0.62, 0.7, -30]]
+    : [[-0.62, -0.5, -90], [0.38, -0.62, 60], [-0.05, 0.08, -20], [0.62, 0.42, -50], [-0.48, 0.66, 80]];
+  return spots.map(([ux, uy, z], i) => ({ cx: ux * L.chaos.rx, cy: uy * L.chaos.ry, cz: z, phase: i * 1.3, spin: 0.45 + (i % 3) * 0.2 }));
+}
+
+function buildParticles(L: Layout, glyphPts: [number, number][][]): Particle[] {
   const N = L.mobile ? 640 : 1300;
   const perCard = Math.floor(N / PAIRS.length);
   const out: Particle[] = [];
@@ -157,12 +217,21 @@ function buildParticles(L: Layout): Particle[] {
       return [rect.x + 13 + col * 2, rect.y + 11 + row * (rect.h - 22)];
     });
     [...outline, ...accent].forEach(([tx, ty]) => {
-      // Gaussian-ish scatter inside the chaos ellipse.
-      const ang = Math.random() * Math.PI * 2;
-      const rad = Math.sqrt(Math.random()) * (0.55 + Math.random() * 0.5);
+      const useGlyph = glyphPts.length > 0 && Math.random() < 0.58;
+      const glyph = useGlyph ? Math.floor(Math.random() * glyphPts.length) : -1;
+      const gp = useGlyph ? glyphPts[glyph][Math.floor(Math.random() * glyphPts[glyph].length)] ?? [0, 0] : [0, 0];
+      // Nebula: a point inside a 3D ellipsoid around the chaos centre.
+      const u = Math.random() * 2 - 1;
+      const th = Math.random() * Math.PI * 2;
+      const r = Math.cbrt(Math.random());
+      const sq = Math.sqrt(1 - u * u);
       out.push({
-        cx: L.chaos.cx + Math.cos(ang) * rad * L.chaos.rx,
-        cy: L.chaos.cy + Math.sin(ang) * rad * L.chaos.ry,
+        glyph,
+        lx: gp[0],
+        ly: gp[1],
+        ox: r * sq * Math.cos(th) * L.chaos.rx,
+        oy: r * u * L.chaos.ry,
+        oz: r * sq * Math.sin(th) * L.chaos.rx * 0.8,
         tx,
         ty,
         card: k,
@@ -174,23 +243,41 @@ function buildParticles(L: Layout): Particle[] {
         p1: Math.random() * 6.28,
         p2: Math.random() * 6.28,
         pal: Math.floor(Math.random() * 3),
-        size: 1.3 + Math.random() * 0.9,
+        size: 1.4 + Math.random() * 1.0,
       });
     });
   });
   return out;
 }
 
-/** A few looping scribbles through the chaos zone — the "tangle". */
+/** Looping 3D scribbles through the nebula — the "tangle". */
 function buildScribbles(L: Layout) {
   return Array.from({ length: 3 }, () =>
-    Array.from({ length: 16 }, () => {
-      const ang = Math.random() * Math.PI * 2;
-      const rad = Math.sqrt(Math.random()) * 0.95;
-      return { x: L.chaos.cx + Math.cos(ang) * rad * L.chaos.rx, y: L.chaos.cy + Math.sin(ang) * rad * L.chaos.ry, ph: Math.random() * 6.28 };
-    })
+    Array.from({ length: 16 }, () => ({
+      ox: (Math.random() * 2 - 1) * L.chaos.rx * 0.9,
+      oy: (Math.random() * 2 - 1) * L.chaos.ry * 0.9,
+      oz: (Math.random() * 2 - 1) * L.chaos.rx * 0.6,
+      ph: Math.random() * 6.28,
+    }))
   );
 }
+
+// Icosahedron — the wireframe "engine" at the core.
+const PHI = (1 + Math.sqrt(5)) / 2;
+const ICO_V: [number, number, number][] = [
+  [-1, PHI, 0], [1, PHI, 0], [-1, -PHI, 0], [1, -PHI, 0],
+  [0, -1, PHI], [0, 1, PHI], [0, -1, -PHI], [0, 1, -PHI],
+  [PHI, 0, -1], [PHI, 0, 1], [-PHI, 0, -1], [-PHI, 0, 1],
+].map(([a, b, c]) => {
+  const n = Math.hypot(a, b, c);
+  return [a / n, b / n, c / n] as [number, number, number];
+});
+const ICO_E: [number, number][] = [];
+ICO_V.forEach((a, i) =>
+  ICO_V.forEach((b, j) => {
+    if (j > i && Math.abs(Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) - 1.0515) < 0.01) ICO_E.push([i, j]);
+  })
+);
 
 // Scroll progress p → morph progress m (the stream runs through the middle of the section).
 const M_START = 0.22;
@@ -227,9 +314,20 @@ export function ProblemToProduct() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let L = computeLayout(stage.clientWidth, stage.clientHeight);
-    let particles = buildParticles(L);
+    const glyphSize = () => (L.mobile ? 66 : 116);
+    let glyphPts = GLYPH_KINDS.map((k) => sampleGlyph(k, glyphSize()));
+    let glyphs = buildGlyphs(L);
+    let particles = buildParticles(L, glyphPts);
     let scribbles = buildScribbles(L);
     let raf = 0;
+    // Pointer tilts the whole scene a little (desktop only).
+    let yaw = 0;
+    let yawTarget = 0;
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    const onPointer = (e: PointerEvent) => {
+      yawTarget = (e.clientX / window.innerWidth - 0.5) * 2;
+    };
+    if (fine && !reduce) window.addEventListener("pointermove", onPointer, { passive: true });
     let running = false;
     let lastW = 0;
     let lastH = 0;
@@ -243,7 +341,9 @@ export function ProblemToProduct() {
       canvas.style.width = `${L.W}px`;
       canvas.style.height = `${L.H}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      particles = buildParticles(L);
+      glyphPts = GLYPH_KINDS.map((k) => sampleGlyph(k, glyphSize()));
+      glyphs = buildGlyphs(L);
+      particles = buildParticles(L, glyphPts);
       scribbles = buildScribbles(L);
       setLayout(L);
     };
@@ -253,17 +353,35 @@ export function ProblemToProduct() {
       const time = reduce ? 0 : now / 1000;
       const p = scrollYProgress.get();
       const m = remap(p, M_START, M_END);
-      const { W, H, core } = L;
+      const { W, H, core, chaos } = L;
       ctx.clearRect(0, 0, W, H);
 
-      // The tangle: scribbled loops that fade as the problems get pulled in.
+      // Camera: simple perspective around a vanishing point.
+      const F = L.mobile ? 560 : 950;
+      const vx = W / 2;
+      const vy = H * 0.55;
+      const proj = (x: number, y: number, z: number) => {
+        const sc = F / (F + z);
+        return [vx + (x - vx) * sc, vy + (y - vy) * sc, sc] as const;
+      };
+      yaw += (yawTarget - yaw) * 0.05;
+      const phi = time * 0.22 + yaw * 0.6; // nebula rotation
+      const cphi = Math.cos(phi);
+      const sphi = Math.sin(phi);
+
+      // The tangle: 3D scribbles orbiting with the nebula, fading as problems get pulled in.
       const tangle = 1 - remap(m, 0, 0.45);
       if (tangle > 0) {
         ctx.lineWidth = 1;
-        ctx.strokeStyle = `rgba(249,115,22,${0.28 * tangle})`;
+        ctx.strokeStyle = `rgba(249,115,22,${0.26 * tangle})`;
         for (const pts of scribbles) {
+          const q = pts.map((pt) => {
+            const ox = pt.ox + Math.sin(time * 0.8 + pt.ph) * 8;
+            const oy = pt.oy + Math.cos(time * 0.7 + pt.ph) * 8;
+            const [sx, sy] = proj(chaos.cx + ox * cphi + pt.oz * sphi, chaos.cy + oy, -ox * sphi + pt.oz * cphi);
+            return [sx, sy];
+          });
           ctx.beginPath();
-          const q = pts.map((pt) => [pt.x + Math.sin(time * 0.8 + pt.ph) * 8, pt.y + Math.cos(time * 0.7 + pt.ph) * 8]);
           ctx.moveTo((q[0][0] + q[1][0]) / 2, (q[0][1] + q[1][1]) / 2);
           for (let i = 1; i < q.length; i++) {
             const n = q[(i + 1) % q.length];
@@ -275,15 +393,18 @@ export function ProblemToProduct() {
 
       // Flow intensity through the core peaks mid-transition.
       const flow = Math.sin(Math.PI * clamp(m * 1.05));
-      const glowR = 70 + flow * 110;
+      const glowR = 80 + flow * 120;
       const g = ctx.createRadialGradient(core.x, core.y, 0, core.x, core.y, glowR);
-      g.addColorStop(0, `rgba(125,211,252,${0.18 + flow * 0.35})`);
-      g.addColorStop(0.4, `rgba(59,130,246,${0.08 + flow * 0.18})`);
+      g.addColorStop(0, `rgba(125,211,252,${0.16 + flow * 0.32})`);
+      g.addColorStop(0.4, `rgba(59,130,246,${0.07 + flow * 0.16})`);
       g.addColorStop(1, "rgba(59,130,246,0)");
       ctx.fillStyle = g;
       ctx.fillRect(core.x - glowR, core.y - glowR, glowR * 2, glowR * 2);
 
-      // Beams from the core to every card that has formed.
+      // Card hinge: each card starts swung away (right edge deep in Z) and closes flat as it forms.
+      const theta = L.cards.map((_, k) => (1 - easeOut(remap(m, cardFormedAt(k) - 0.2, cardFormedAt(k) + 0.05))) * 1.15);
+
+      // Beams from the core to each card while data is flowing into it.
       L.cards.forEach((c, k) => {
         const f = L.mobile ? remap(m, cardFormedAt(k) - 0.08, cardFormedAt(k)) : remap(m, cardFormedAt(k) - 0.3, cardFormedAt(k) - 0.18);
         if (f <= 0) return;
@@ -304,71 +425,161 @@ export function ProblemToProduct() {
         }
       });
 
-      // Particles: chaos → through the core (with a swirl) → ordered card outlines.
+      // Particles: rough-idea nebula (3D) → helix into the core → ordered, hinged card outlines.
       ctx.globalCompositeOperation = "lighter";
       for (const pt of particles) {
         const t = clamp((m - pt.delay * 0.35) / 0.65);
         const e = easeInOut(t);
-        const jitter = 1 - clamp(e * 2);
-        const hx = pt.cx + (Math.sin(time * pt.f1 + pt.p1) * pt.a1 + Math.sin(time * 2.3 * pt.f2 + pt.p2) * 4) * jitter;
-        const hy = pt.cy + (Math.cos(time * pt.f2 + pt.p2) * pt.a2 + Math.cos(time * 1.9 * pt.f1 + pt.p1) * 4) * jitter;
+
+        // Home position in the idea nebula.
+        let hx: number;
+        let hy: number;
+        let hz: number;
+        if (pt.glyph >= 0) {
+          const G = glyphs[pt.glyph];
+          const psi = time * G.spin + G.phase + yaw;
+          const c6 = Math.cos(phi * 0.6);
+          const s6 = Math.sin(phi * 0.6);
+          const gx = G.cx * c6 + G.cz * s6;
+          const gz = -G.cx * s6 + G.cz * c6;
+          const lx = pt.lx + Math.sin(time * pt.f1 + pt.p1) * 1.8;
+          const ly = pt.ly + Math.cos(time * pt.f2 + pt.p2) * 1.8;
+          hx = chaos.cx + gx + lx * Math.cos(psi);
+          hz = gz + lx * Math.sin(psi);
+          hy = chaos.cy + G.cy + ly + Math.sin(time * 0.9 + G.phase) * 6;
+        } else {
+          const ox = pt.ox + Math.sin(time * pt.f1 + pt.p1) * pt.a1 * 0.5;
+          const oy = pt.oy + Math.cos(time * pt.f2 + pt.p2) * pt.a2 * 0.5;
+          hx = chaos.cx + ox * cphi + pt.oz * sphi;
+          hz = -ox * sphi + pt.oz * cphi;
+          hy = chaos.cy + oy;
+        }
+
+        // Target on the (hinged) card plane.
+        const c = L.cards[pt.card];
+        const th = theta[pt.card];
+        const dxCard = pt.tx - c.x;
+        const TX = c.x + dxCard * Math.cos(th);
+        const TZ = dxCard * Math.sin(th);
+        const TY = pt.ty;
 
         let x: number;
         let y: number;
+        let z: number;
         if (e < 0.5) {
-          const s = easeInOut(e * 2);
-          x = hx + (core.x - hx) * s;
-          y = hy + (core.y - hy) * s;
+          const s2 = easeInOut(e * 2);
+          x = hx + (core.x - hx) * s2;
+          y = hy + (core.y - hy) * s2;
+          z = hz * (1 - s2);
+          // Helix around the path so the stream visibly spirals in depth.
+          const r = 34 * Math.sin(Math.PI * s2);
+          const ang = s2 * 5 * Math.PI + pt.p1;
+          y += r * Math.cos(ang);
+          z += r * Math.sin(ang) * 1.4;
         } else if (L.mobile) {
-          const s = easeOut((e - 0.5) * 2);
-          x = core.x + (pt.tx - core.x) * s;
-          y = core.y + (pt.ty - core.y) * s;
+          const s2 = easeOut((e - 0.5) * 2);
+          x = core.x + (TX - core.x) * s2;
+          y = core.y + (TY - core.y) * s2;
+          z = TZ * s2;
         } else {
           const post = (e - 0.5) * 2;
-          const c = L.cards[pt.card];
           const ex = c.x - 4;
-          const ey = c.y + c.h / 2 + (pt.p1 - 3.14) * 1.1; // a narrow band, not a single line
+          const ey = c.y + c.h / 2 + (pt.p1 - 3.14) * 1.1;
           if (post < 0.6) {
             const u = easeInOut(post / 0.6);
             const mx = core.x + (ex - core.x) * 0.5;
             const iu = 1 - u;
             x = iu * iu * iu * core.x + 3 * iu * iu * u * mx + 3 * iu * u * u * mx + u * u * u * ex;
             y = iu * iu * iu * core.y + 3 * iu * iu * u * core.y + 3 * iu * u * u * ey + u * u * u * ey;
+            z = 0;
           } else {
             const u = easeOut((post - 0.6) / 0.4);
-            x = ex + (pt.tx - ex) * u;
-            y = ey + (pt.ty - ey) * u;
+            x = ex + (TX - ex) * u;
+            y = ey + (TY - ey) * u;
+            z = TZ * u;
           }
         }
-        // Vortex: spin around the core while passing through it.
+
+        // Orbit around the core's vertical axis while passing through it.
         const near = 1 - Math.abs(e * 2 - 1);
         if (near > 0) {
-          const ang = near * near * near * 1.9;
+          const ang = near * near * 2.4;
           const dx = x - core.x;
-          const dy = y - core.y;
-          x = core.x + dx * Math.cos(ang) - dy * Math.sin(ang);
-          y = core.y + dx * Math.sin(ang) + dy * Math.cos(ang);
+          x = core.x + dx * Math.cos(ang) - z * Math.sin(ang);
+          z = dx * Math.sin(ang) + z * Math.cos(ang);
         }
-        // Formed cards shimmer gently so the product feels alive.
+
+        const [sx, sy, sc] = proj(x, y, z);
+        const depth = clamp(0.3 + (sc - 0.72) * 1.4, 0.22, 1);
         if (e >= 1 && !reduce) {
           const shimmer = 0.5 + 0.5 * Math.sin(time * 2.2 - pt.tx * 0.02 + pt.card);
-          ctx.globalAlpha = 0.55 + shimmer * 0.45;
+          ctx.globalAlpha = (0.55 + shimmer * 0.45) * depth;
         } else {
-          ctx.globalAlpha = 0.55 + near * 0.45;
+          ctx.globalAlpha = (0.55 + near * 0.45) * depth;
         }
         const mix = clamp((e - 0.4) / 0.2);
         ctx.fillStyle = COLOR_TABLE[pt.pal][Math.round(mix * MIX_STEPS)];
-        const s = pt.size + near * 0.8;
-        ctx.fillRect(x - s / 2, y - s / 2, s, s);
+        const sz = (pt.size + near * 0.9) * sc;
+        ctx.fillRect(sx - sz / 2, sy - sz / 2, sz, sz);
       }
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = "source-over";
 
-      // DOM overlays driven from the same clock (no React re-renders per frame).
-      if (coreRef.current) {
-        coreRef.current.style.transform = `translate(-50%, -50%) scale(${0.9 + flow * 0.3})`;
-        coreRef.current.style.setProperty("--flow", String(flow));
+      // The engine: a rotating wireframe icosahedron inside two tilted orbit rings.
+      const R = (L.mobile ? 26 : 40) * (0.92 + flow * 0.35);
+      const ra = time * 0.55 + yaw * 1.5;
+      const rb = time * 0.33 + 0.4;
+      const verts = ICO_V.map(([a, b, cz]) => {
+        const x1 = a * Math.cos(ra) + cz * Math.sin(ra);
+        const z1 = -a * Math.sin(ra) + cz * Math.cos(ra);
+        const y2 = b * Math.cos(rb) - z1 * Math.sin(rb);
+        const z2 = b * Math.sin(rb) + z1 * Math.cos(rb);
+        const [px, py] = proj(core.x + x1 * R, core.y + y2 * R, z2 * R);
+        return { px, py, d: z2 };
+      });
+      ctx.lineWidth = 1.2;
+      for (const [i, j] of ICO_E) {
+        const d = (verts[i].d + verts[j].d) / 2; // -1 near … +1 far
+        ctx.strokeStyle = `rgba(125,211,252,${(0.2 + 0.7 * (1 - (d + 1) / 2)) * (0.75 + flow * 0.25)})`;
+        ctx.beginPath();
+        ctx.moveTo(verts[i].px, verts[i].py);
+        ctx.lineTo(verts[j].px, verts[j].py);
+        ctx.stroke();
       }
+      ctx.fillStyle = "rgba(186,230,253,0.9)";
+      for (const v of verts) ctx.fillRect(v.px - 1.2, v.py - 1.2, 2.4, 2.4);
+
+      [0, 1].forEach((i) => {
+        const Rr = R * (i ? 2.35 : 1.8);
+        const tilt = i ? 1.12 : 1.32;
+        const spin = time * (i ? -0.35 : 0.25);
+        const pt3 = (a: number) => {
+          const px = Rr * Math.cos(a);
+          const py0 = Rr * Math.sin(a);
+          const py = py0 * Math.cos(tilt);
+          const pz = py0 * Math.sin(tilt);
+          const x2 = px * Math.cos(spin) - py * Math.sin(spin);
+          const y2 = px * Math.sin(spin) + py * Math.cos(spin);
+          return proj(core.x + x2, core.y + y2, pz);
+        };
+        ctx.strokeStyle = `rgba(34,211,238,${0.18 + flow * 0.3})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let s = 0; s <= 64; s++) {
+          const [px, py] = pt3((s / 64) * Math.PI * 2);
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        const [dx, dy, dsc] = pt3(time * (1.1 + i * 0.5));
+        ctx.fillStyle = "rgba(34,211,238,0.95)";
+        ctx.beginPath();
+        ctx.arc(dx, dy, 2.4 * dsc, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // DOM overlays driven from the same clock (no React re-renders per frame).
+      if (coreRef.current) coreRef.current.style.transform = `translate(-50%, -50%) scale(${0.9 + flow * 0.3})`;
       if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
 
       PAIRS.forEach((_, k) => {
@@ -397,7 +608,7 @@ export function ProblemToProduct() {
         if (card) {
           const f = easeOut(remap(m, cardFormedAt(k) - 0.02, cardFormedAt(k) + 0.06));
           card.style.opacity = String(f);
-          card.style.transform = `translateX(${(1 - f) * -14}px)`;
+          card.style.transform = `perspective(900px) rotateY(${(theta[k] * 180) / Math.PI}deg)`;
         }
       });
 
@@ -426,6 +637,7 @@ export function ProblemToProduct() {
       stop();
       io.disconnect();
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onPointer);
     };
   }, [scrollYProgress]);
 
@@ -516,18 +728,14 @@ export function ProblemToProduct() {
           </div>
         ))}
 
-        {/* The core */}
+        {/* The core label — the 3D engine itself is drawn on the canvas */}
         {layout && (
           <div
             ref={coreRef}
             style={{ left: layout.core.x, top: layout.core.y, transform: "translate(-50%, -50%)" }}
-            className="absolute z-10 w-[92px] h-[92px] sm:w-[120px] sm:h-[120px] pointer-events-none"
+            className="absolute z-10 pointer-events-none"
           >
-            <div className="absolute inset-0 rounded-full border border-dashed border-accent-soft/50 animate-[spin_14s_linear_infinite]" />
-            <div className="absolute inset-[14%] rounded-full border border-neon/40 animate-[spin_9s_linear_infinite_reverse]" />
-            <div className="absolute inset-[28%] rounded-full bg-gradient-to-br from-accent/60 to-neon/40 shadow-[0_0_40px_rgba(34,211,238,0.55)] flex items-center justify-center">
-              <span className="font-mono text-[11px] sm:text-sm font-semibold text-white">&lt;/&gt;</span>
-            </div>
+            <span className="font-mono text-[11px] sm:text-sm font-semibold text-white [text-shadow:0_0_12px_rgba(34,211,238,0.9)]">&lt;/&gt;</span>
           </div>
         )}
 
@@ -542,7 +750,7 @@ export function ProblemToProduct() {
                   cardRefs.current[k] = el;
                 }}
                 style={{ left: c.x, top: c.y, width: c.w, height: c.h, opacity: 0 }}
-                className="absolute z-10 rounded-[12px] bg-accent/[0.05] flex items-center gap-2.5 pl-6 pr-3 sm:pr-4"
+                className="absolute z-10 rounded-[12px] bg-accent/[0.05] flex items-center gap-2.5 pl-6 pr-3 sm:pr-4 [transform-origin:left_center]"
               >
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-neon" />
                 <span className="flex-1 min-w-0 text-[11px] sm:text-[13px] text-bone leading-tight truncate">{pair.solution}</span>

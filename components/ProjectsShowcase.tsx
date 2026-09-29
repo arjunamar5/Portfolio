@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
-import { motion } from "framer-motion";
-import { Briefcase, ArrowUpRight, GraduationCap } from "lucide-react";
+import React, { useCallback, useRef, useState } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { Briefcase, ArrowUpRight, ArrowRight, Check, GraduationCap, TrendingUp } from "lucide-react";
 import { PORTFOLIO_DATA, ProjectCaseStudy } from "@/data/portfolio-data";
 import { MriVisual } from "./MriVisual";
 import { CourtVisual, StudyVisual, CompassVisual } from "./ProjectVisuals";
 import { ProjectCard } from "./ProjectCard";
 import { SectionHeading } from "./SectionHeading";
-import { CaseCard } from "./CaseCard";
+import { CountUp } from "./CountUp";
 import { CaseStudyModal } from "./CaseStudyModal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -59,9 +59,39 @@ function GroupLabel({ live, title, note }: { live?: boolean; title: string; note
   );
 }
 
+/** Gentle 3D tilt that follows the pointer while hovering the template. */
+function TiltStage({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const srx = useSpring(rx, { stiffness: 150, damping: 20 });
+  const sry = useSpring(ry, { stiffness: 150, damping: 20 });
+  const onMove = (e: React.MouseEvent) => {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    ry.set(((e.clientX - r.left) / r.width - 0.5) * 7);
+    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 7);
+  };
+  return (
+    <div ref={ref} onMouseMove={onMove} onMouseLeave={() => (rx.set(0), ry.set(0))} className="[perspective:1400px]">
+      <motion.div style={{ rotateX: srx, rotateY: sry }}>{children}</motion.div>
+    </div>
+  );
+}
+
+/** "300+" → count-up 300 with "+" suffix. */
+function Metric({ value }: { value: string }) {
+  const m = value.match(/^([+]?)(\d+(?:\.\d+)?)(.*)$/);
+  if (!m) return <>{value}</>;
+  return <CountUp value={parseFloat(m[2])} prefix={m[1]} suffix={m[3]} />;
+}
+
 function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStudy; index: number; onOpenCase: () => void }) {
   const role = PORTFOLIO_DATA.experience.find((e) => e.projectId === project.id);
-  const chips = project.chips ?? project.techStack.flatMap((t) => t.items).slice(0, 9);
+  const impact = project.impact;
+  // Big numbers only when they are real numbers; otherwise the before → after lines say it better.
+  const numeric = project.impactMetrics.filter((m) => /^\+?\d+(\.\d+)?[%+]?$/.test(m.value));
+  const rows = (impact?.rows ?? []).slice(0, numeric.length ? 3 : 4);
   const item = {
     hidden: { opacity: 0, y: 22 },
     show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
@@ -70,14 +100,27 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
   return (
     <div
       id={project.id}
-      className="relative scroll-mt-24 grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 lg:gap-14 items-start py-12 sm:py-16"
+      className="relative scroll-mt-24 grid grid-cols-1 lg:grid-cols-[1.12fr_0.88fr] gap-10 lg:gap-16 items-center py-12 sm:py-16"
     >
+      {/* What the app does */}
+      <motion.div
+        initial={{ opacity: 0, x: -50, scale: 0.97 }}
+        whileInView={{ opacity: 1, x: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 1, ease: EASE }}
+        className="relative z-10"
+      >
+        <TiltStage>
+          <ProjectVisual project={project} />
+        </TiltStage>
+      </motion.div>
+
+      {/* What it changed */}
       <motion.div
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.25 }}
         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
-        className="lg:sticky lg:top-28"
       >
         <motion.div variants={item} className="flex flex-wrap items-center gap-2 mb-4">
           <span
@@ -88,14 +131,12 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
             Case {String(index + 1).padStart(2, "0")}
           </span>
           <span className="text-xs text-dim">{project.sceneLabel}</span>
-          <span className="text-xs text-faint">· {project.confidentialityTag}</span>
         </motion.div>
 
-        <motion.h3 variants={item} className="text-3xl sm:text-[2.75rem] font-semibold text-bone tracking-tight leading-[1.05]">
+        <motion.h3 variants={item} className="text-3xl sm:text-[2.6rem] font-semibold text-bone tracking-tight leading-[1.05]">
           {project.shortTitle}
           <span className="inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[3px] ml-2 align-baseline rotate-45" style={{ background: project.accent }} />
         </motion.h3>
-
         {role && (
           <motion.div variants={item} className="mt-3 inline-flex items-center gap-2 text-sm text-dim">
             <Briefcase className="w-4 h-4" style={{ color: project.accent }} />
@@ -103,43 +144,59 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
           </motion.div>
         )}
 
-        <motion.p variants={item} className="text-bone/80 text-base sm:text-lg mt-4 leading-relaxed">
-          {project.tagline}
-        </motion.p>
-        <motion.p variants={item} className="text-sm text-dim mt-4 leading-relaxed">
-          {project.description}
-        </motion.p>
+        {impact && (
+          <>
+            <motion.div variants={item} className="mt-7 flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.2em] text-emerald-300">
+              <TrendingUp className="w-3.5 h-3.5" /> The impact
+            </motion.div>
+            <motion.p variants={item} className="mt-2 text-xl sm:text-2xl font-semibold text-bone leading-snug text-balance">
+              {impact.headline}
+            </motion.p>
 
-        <motion.div variants={item} className="flex flex-wrap gap-1.5 mt-6">
-          {chips.map((c) => (
-            <span key={c} className="text-[11px] text-dim rounded-md px-2 py-1 border border-line bg-void/50">
-              {c}
-            </span>
-          ))}
-        </motion.div>
+            {numeric.length > 0 && (
+              <motion.div variants={item} className="mt-6 grid grid-cols-3 gap-3">
+                {numeric.slice(0, 3).map((m) => (
+                  <div key={m.label} className="rounded-xl border border-line bg-panel/60 px-3 py-3">
+                    <div className="text-2xl sm:text-3xl font-semibold tracking-tight" style={{ color: project.accent }}>
+                      <Metric value={m.value} />
+                    </div>
+                    <div className="text-[11px] text-faint mt-1 leading-snug">{m.label}</div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
 
-        {project.architectureOverview && (
-          <motion.button
-            variants={item}
-            onClick={onOpenCase}
-            className="group mt-7 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm text-bone transition-colors hover:bg-panel-2"
-            style={{ borderColor: `${project.accent}66` }}
-          >
-            Open the full case study
-            <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" style={{ color: project.accent }} />
-          </motion.button>
+            <motion.ul variants={item} className="mt-6 space-y-2.5">
+              {rows.map((r, i) => (
+                <motion.li
+                  key={r.area}
+                  initial={{ opacity: 0, x: 16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.8 }}
+                  transition={{ duration: 0.5, delay: 0.2 + i * 0.1, ease: EASE }}
+                  className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 rounded-xl border border-line bg-panel/40 px-3.5 py-2.5"
+                >
+                  <span className="min-w-0 sm:flex-1 text-[12px] sm:text-[12.5px] text-red-300/70 line-through decoration-red-400/50 sm:truncate">{r.before}</span>
+                  <ArrowRight className="hidden sm:block w-3.5 h-3.5 shrink-0 text-faint" />
+                  <span className="min-w-0 sm:flex-[1.3] flex items-center gap-1.5 text-[13px] text-bone">
+                    <Check className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                    <span className="sm:truncate">{r.after}</span>
+                  </span>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </>
         )}
-      </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 50, scale: 0.97 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.1 }}
-        transition={{ duration: 1, ease: EASE }}
-      >
-        <CaseCard project={project}>
-          <ProjectVisual project={project} />
-        </CaseCard>
+        <motion.button
+          variants={item}
+          onClick={onOpenCase}
+          className="group mt-7 inline-flex items-center gap-2 text-sm transition-colors hover:text-bone"
+          style={{ color: project.accent }}
+        >
+          How I built it — open the case study
+          <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </motion.button>
       </motion.div>
     </div>
   );
@@ -162,7 +219,7 @@ export function ProjectsShowcase() {
           eyebrow="Projects"
           title="Selected work."
           accentFrom={1}
-          lede="Each one starts with a real problem. Here's what I built — and what changed because of it."
+          lede="What each app does — and what changed for the people using it."
         />
 
         <GroupLabel live title="Live projects" note="Built for — and used by — real clients" />

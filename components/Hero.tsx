@@ -5,12 +5,8 @@ import { motion, useMotionValue, useScroll, useSpring, useTransform } from "fram
 import { ArrowRight, FileText, Mail } from "lucide-react";
 import { PORTFOLIO_DATA } from "@/data/portfolio-data";
 import { Magnetic } from "./Magnetic";
-import { CountUp } from "./CountUp";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-// Divider placement for the stats row: 2×2 on mobile, 1×4 from `sm`.
-const STAT_CELL = ["", "pl-5 border-l border-line", "sm:pl-5 sm:border-l sm:border-line", "pl-5 border-l border-line"];
 
 type Token = { t: string; c?: string };
 
@@ -208,7 +204,7 @@ function Typewriter({ words, active }: { words: string[]; active: boolean }) {
 }
 
 export function Hero({ onOpenResume, ready }: { onOpenResume: () => void; ready: boolean }) {
-  const { name, typingTitles, bioShort, stats } = PORTFOLIO_DATA.personal;
+  const { name, typingTitles, bioShort } = PORTFOLIO_DATA.personal;
   const [first, ...rest] = name.split(" ");
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -263,14 +259,6 @@ export function Hero({ onOpenResume, ready }: { onOpenResume: () => void; ready:
       <motion.div style={{ y: contentY, opacity: contentOpacity }} className="relative max-w-[1280px] w-full mx-auto px-6 sm:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
           <div>
-            <motion.div {...show(0.05)} className="inline-flex items-center gap-2.5 rounded-full glass px-3.5 py-1.5 mb-7">
-              <span className="relative flex w-2 h-2">
-                <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-400" />
-              </span>
-              <span className="text-xs text-dim">Open to full-time roles · {PORTFOLIO_DATA.personal.location}</span>
-            </motion.div>
-
             <motion.p {...show(0.1)} className="text-xl sm:text-2xl text-dim mb-2">
               Hi, I&apos;m
             </motion.p>
@@ -320,21 +308,6 @@ export function Hero({ onOpenResume, ready }: { onOpenResume: () => void; ready:
                 </button>
               </Magnetic>
             </motion.div>
-
-            <motion.dl
-              {...show(0.9)}
-              className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-y-6 max-w-xl border-t border-line pt-6"
-            >
-              {stats.map((s, i) => (
-                <div key={s.label} className={STAT_CELL[i] ?? ""}>
-                  <dt className="sr-only">{s.label}</dt>
-                  <dd className="text-2xl sm:text-3xl font-semibold text-bone tracking-tight">
-                    <CountUp value={s.value} decimals={s.decimals} prefix={s.prefix} suffix={s.suffix} start={ready} />
-                  </dd>
-                  <dd className="text-[11px] text-faint mt-1 leading-snug">{s.label}</dd>
-                </div>
-              ))}
-            </motion.dl>
           </div>
 
           <CodeCard ready={ready} />

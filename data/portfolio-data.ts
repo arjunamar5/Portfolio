@@ -9,11 +9,10 @@ export interface ExperienceItem {
   role: string;
   period: string;
   location: string;
-  summary: string;
   highlights: string[];
   techStack: string[];
-  /** Short resume-grounded outcomes shown as chips on the timeline card. */
-  metrics: { value: string; label: string }[];
+  /** Project block this role produced — the timeline links to it instead of repeating its details. */
+  projectId?: string;
 }
 
 export interface ProjectCaseStudy {
@@ -23,44 +22,37 @@ export interface ProjectCaseStudy {
   category: string;
   tagline: string;
   description: string;
-  confidentialityTag: "Private Client Project" | "Official Academic Project";
-  problemStatement: string;
-  objectives: string[];
-  architectureOverview: string;
+  confidentialityTag: "Private Client Project" | "Official Academic Project" | "Client Project";
+  problemStatement?: string;
+  objectives?: string[];
+  architectureOverview?: string;
   techStack: { category: string; items: string[] }[];
   keyFeatures: { title: string; description: string; icon?: string }[];
-  developmentJourney: string;
-  challengesAndSolutions: { challenge: string; solution: string }[];
+  developmentJourney?: string;
+  challengesAndSolutions?: { challenge: string; solution: string }[];
   impactMetrics: { label: string; value: string }[];
   codeSnippet?: { title: string; language: string; code: string };
   databaseSchema?: { title: string; description: string; tables: { name: string; fields: string[] }[] };
-  visualType: "mri-viewer" | "study-saas" | "court-booking" | "residence-hub" | "quickpark-iot" | "cloud-aws";
+  visualType: "mri-viewer" | "study-saas" | "court-booking" | "travel-concierge" | "residence-hub" | "quickpark-iot" | "cloud-aws";
   /** Muted per-project accent used sparingly in the case study (badges, icon tint). */
   accent: string;
   /** Short category label shown as the card's eyebrow. */
   sceneLabel: string;
   /** Index string like "01", used for case-study pagination. */
   index: string;
-  engineeringDecisions: { decision: string; reasoning: string }[];
-  keyLearnings: string[];
+  engineeringDecisions?: { decision: string; reasoning: string }[];
+  keyLearnings?: string[];
   /** Featured projects get the large alternating showcase layout; others get the compact card grid. */
   featured?: boolean;
   /** Real product screenshots, in /public. Falls back to an abstract mockup when omitted. */
   images?: string[];
+  /** Pill tags shown under a featured project; defaults to its tech stack. */
+  chips?: string[];
 }
 
 export interface TechEntry {
   name: string;
   icon: string;
-  label: string;
-}
-
-export interface Stat {
-  /** Numeric part animates as a count-up; prefix/suffix are static. */
-  value: number;
-  decimals?: number;
-  prefix?: string;
-  suffix?: string;
   label: string;
 }
 
@@ -108,12 +100,6 @@ I enjoy exploring how different technologies come together to solve meaningful p
         "Led the CSI team in organizing and executing technical events and coding competitions, overseeing task delegation and coordination while fostering effective teamwork and communication.",
     },
     researchNote: "8 papers accepted/published in Scopus-indexed international conferences, including IEEE and Springer.",
-    stats: [
-      { value: 8, label: "Research papers" },
-      { value: 2, label: "Client platforms shipped" },
-      { value: 300, suffix: "+", label: "Student profiles managed" },
-      { value: 8.26, decimals: 2, label: "CGPA" },
-    ] as Stat[],
   },
 
   skills: [
@@ -160,18 +146,13 @@ I enjoy exploring how different technologies come together to solve meaningful p
       role: "Full-Stack Developer",
       period: "May 2026 – Jun 2026",
       location: "Coimbatore, India",
-      summary: "Built a full-stack booking and billing platform for a sports venue & café — from WhatsApp bookings to an AI analytics assistant.",
       highlights: [
         "Developed a full-stack booking platform with automated WhatsApp bookings, real-time court blocking, and centralized slot tracking.",
         "Automated billing with court add-ons, food orders, and membership-based pricing, reducing manual billing effort.",
         "Built CueBot, an AI-powered analytics assistant for instant natural-language insights into revenue, bookings, customers, and sales.",
       ],
       techStack: ["React.js", "Node.js", "Express.js", "PostgreSQL", "WhatsApp Cloud API", "Tailwind CSS", "Chart.js"],
-      metrics: [
-        { value: "WhatsApp", label: "Automated bookings" },
-        { value: "Real-time", label: "Court blocking" },
-        { value: "CueBot", label: "AI analytics" },
-      ],
+      projectId: "project-3-cue-court-coffee",
     },
     {
       id: "perfect-study-space",
@@ -179,18 +160,13 @@ I enjoy exploring how different technologies come together to solve meaningful p
       role: "Full-Stack Developer",
       period: "Jun 2026 – Jul 2026",
       location: "Coimbatore, India",
-      summary: "Built a multi-branch management platform and the public website for a chain of study centres, centralizing daily operations.",
       highlights: [
         "Developed a multi-branch management platform supporting 3 branches, 5 staff, and 300+ student profiles, centralizing daily operations.",
         "Automated student registration, attendance, fee management, seat allocation, and notifications, reducing manual administrative work.",
         "Developed and deployed the organization website, increasing daily student enquiries by 50% across 3 branches.",
       ],
       techStack: ["Next.js", "TypeScript", "Node.js", "MongoDB", "Supabase", "Tailwind CSS", "Docker"],
-      metrics: [
-        { value: "3", label: "Branches" },
-        { value: "300+", label: "Student profiles" },
-        { value: "+50%", label: "Daily enquiries" },
-      ],
+      projectId: "project-2-perfect-study-space",
     },
   ] as ExperienceItem[],
 
@@ -337,8 +313,7 @@ I enjoy exploring how different technologies come together to solve meaningful p
         "Multi-tenancy is mostly a data-modeling and middleware problem, not an infrastructure one — shared infrastructure with strict scoping was simpler to operate than isolated databases per branch.",
         "Automated reminders only help retention if they're timed and channel-matched to how members actually respond — WhatsApp outperformed email here."
       ],
-      featured: true,
-      images: ["/projects/perfect-study-space-1.png", "/projects/perfect-study-space-2.png"]
+      featured: true
     },
 
     {
@@ -389,8 +364,35 @@ I enjoy exploring how different technologies come together to solve meaningful p
         "Temporary locks with automatic expiry solved double-booking more cleanly than trying to validate at final submit.",
         "For a transactional bot like this, response latency is part of the UX — a slower but 'smarter' model would have hurt conversion."
       ],
-      featured: true,
-      images: ["/projects/cuecourtos-1.png"]
+      featured: true
+    },
+
+    {
+      id: "project-7-alpenglow-global",
+      title: "AlpenGlow Global - Travel Storefront with COMPASS AI Concierge",
+      shortTitle: "AlpenGlow Global",
+      category: "Travel · AI Concierge",
+      tagline: "A boutique travel agency's storefront with COMPASS, an AI concierge that turns a few quick questions into a personalized itinerary.",
+      description: "AlpenGlow makes trip planning simpler from the first idea to the final itinerary. Visitors explore destinations, ask Compass for personalized travel recommendations, or describe exactly what they're looking for through Plan Your Trip — building a journey around their interests, budget, dates, and travel style, with the assistance they need to turn their plans into a real trip.",
+      confidentialityTag: "Client Project",
+      techStack: [],
+      chips: ["COMPASS AI", "Plan Your Trip", "Itineraries", "Collections", "Offer campaigns", "Lead routing", "Journal"],
+      keyFeatures: [
+        { title: "COMPASS — AI trip concierge", description: "Personalized travel recommendations from a few quick questions." },
+        { title: "Plan Your Trip requests", description: "Interests, budget, dates, and travel style captured in one flow." },
+        { title: "Destination collections", description: "Curated destinations and packages to explore." },
+        { title: "Lead routing to sales", description: "Trip requests handed straight to the sales team." }
+      ],
+      impactMetrics: [
+        { label: "Destination collections", value: "4" },
+        { label: "Curated packages", value: "6+" },
+        { label: "Industry recognitions", value: "4" }
+      ],
+      visualType: "travel-concierge",
+      accent: "#FB923C",
+      sceneLabel: "Travel · AI Concierge",
+      index: "07",
+      featured: true
     },
 
     {

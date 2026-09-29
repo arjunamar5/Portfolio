@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import { Briefcase, CheckCircle2 } from "lucide-react";
+import { Briefcase, CheckCircle2, ArrowRight } from "lucide-react";
 import { PORTFOLIO_DATA, ExperienceItem } from "@/data/portfolio-data";
 import { SectionHeading } from "./SectionHeading";
 import { SpotlightCard } from "./SpotlightCard";
@@ -10,6 +10,15 @@ import { SpotlightCard } from "./SpotlightCard";
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 function Role({ item }: { item: ExperienceItem }) {
+  const project = PORTFOLIO_DATA.projects.find((p) => p.id === item.projectId);
+  const goToProject = () => {
+    const el = project && document.getElementById(project.id);
+    if (!el) return;
+    const lenis = (window as any).__lenis;
+    if (lenis) lenis.scrollTo(el, { offset: -40, duration: 1.4 });
+    else el.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -42,8 +51,6 @@ function Role({ item }: { item: ExperienceItem }) {
           </span>
         </div>
 
-        <p className="text-dim mt-4 leading-relaxed">{item.summary}</p>
-
         <motion.ul
           initial="hidden"
           whileInView="show"
@@ -66,29 +73,15 @@ function Role({ item }: { item: ExperienceItem }) {
           ))}
         </motion.ul>
 
-        <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
-          {item.metrics.map((m, mi) => (
-            <motion.div
-              key={m.label}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.8 }}
-              transition={{ duration: 0.6, delay: 0.3 + mi * 0.1, ease: EASE }}
-              className="rounded-xl border border-line bg-panel-2/50 px-2.5 sm:px-3 py-3 min-w-0"
-            >
-              <div className="text-[13px] sm:text-xl font-semibold text-gradient leading-tight break-words">{m.value}</div>
-              <div className="text-[11px] text-faint mt-0.5 leading-snug">{m.label}</div>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-1.5">
-          {item.techStack.map((t) => (
-            <span key={t} className="text-xs text-faint border border-line rounded-full px-2.5 py-1 hover:text-bone hover:border-line-strong transition-colors">
-              {t}
-            </span>
-          ))}
-        </div>
+        {project && (
+          <button
+            onClick={goToProject}
+            className="group mt-6 inline-flex items-center gap-2 text-sm text-accent-soft hover:text-bone transition-colors"
+          >
+            View project · {project.shortTitle}
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </button>
+        )}
       </SpotlightCard>
     </motion.div>
   );

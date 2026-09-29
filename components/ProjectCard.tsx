@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import { Brain, Home, ParkingCircle, Cloud, LucideIcon } from "lucide-react";
+import { Brain, Home, ParkingCircle, Cloud, Compass, LucideIcon } from "lucide-react";
 import { ProjectCaseStudy } from "@/data/portfolio-data";
 import { SpotlightCard, hexToRgb } from "./SpotlightCard";
 
@@ -10,6 +10,7 @@ const ICON_MAP: Record<ProjectCaseStudy["visualType"], LucideIcon> = {
   "mri-viewer": Brain,
   "study-saas": Home,
   "court-booking": Home,
+  "travel-concierge": Compass,
   "residence-hub": Home,
   "quickpark-iot": ParkingCircle,
   "cloud-aws": Cloud,

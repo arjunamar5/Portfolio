@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
+import { VisualFrame } from "./VisualFrame";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const STEP_MS = 1900;
@@ -51,17 +52,7 @@ export function MriVisual() {
   const active = Math.min(step, STEPS.length - 1);
 
   return (
-    <div ref={ref} className="relative rounded-2xl bg-panel overflow-hidden shadow-glow-sm animate-float-slow">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-line bg-panel-2/60">
-        <span className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
-        <span className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
-        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/60" />
-        <span className="ml-2 text-xs text-faint truncate">Brain Tumor AI · Inference</span>
-        <span className="ml-auto font-mono text-[10px] uppercase tracking-wider text-faint border border-line rounded px-1.5 py-0.5">
-          Illustrative
-        </span>
-      </div>
-
+    <VisualFrame frameRef={ref} title="Brain Tumor AI · Inference" accent="#4FBDB6">
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_170px]">
         {/* Scan viewport */}
         <div className="relative bg-[#05070d] aspect-[5/4] overflow-hidden">
@@ -257,6 +248,6 @@ export function MriVisual() {
           })}
         </ol>
       </div>
-    </div>
+    </VisualFrame>
   );
 }

@@ -196,7 +196,7 @@ export function Skills() {
   return (
     <section id="stack" className="relative py-28 sm:py-36 border-t border-line overflow-hidden">
       <div className="max-w-[1180px] mx-auto px-6 sm:px-10 mb-16">
-        <SectionHeading index="05" eyebrow="Skills" title="Technologies I work with." accentFrom={1} />
+        <SectionHeading index="06" eyebrow="Skills" title="Technologies I work with." accentFrom={1} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
           {PORTFOLIO_DATA.skills.map((group, i) => (

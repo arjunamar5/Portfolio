@@ -57,12 +57,6 @@ export interface ProjectCaseStudy {
   };
 }
 
-export interface TechEntry {
-  name: string;
-  icon: string;
-  label: string;
-}
-
 export interface ResearchPaper {
   id: string;
   title: string;
@@ -668,34 +662,3 @@ void sendSlotUpdate(int slotId, bool isOccupied) {
     }
   ] as ResearchPaper[]
 };
-
-/** Technology showcase data — `icon` maps to a react-icons export name (Si* or FaAws). */
-// Every entry here is grounded in the resume's Skills section or a
-// technology named in an actual project/experience — nothing decorative.
-export const TECH_STACK: TechEntry[] = [
-  { name: "React", icon: "SiReact", label: "Frontend" },
-  { name: "Next.js", icon: "SiNextdotjs", label: "Framework" },
-  { name: "TypeScript", icon: "SiTypescript", label: "Language" },
-  { name: "JavaScript", icon: "SiJavascript", label: "Language" },
-  { name: "HTML5", icon: "SiHtml5", label: "Markup" },
-  { name: "CSS3", icon: "SiCss", label: "Styling" },
-  { name: "Tailwind CSS", icon: "SiTailwindcss", label: "Styling" },
-  { name: "Framer Motion", icon: "SiFramer", label: "Animation" },
-  { name: "Node.js", icon: "SiNodedotjs", label: "Runtime" },
-  { name: "Express", icon: "SiExpress", label: "Backend" },
-  { name: "Flask", icon: "SiFlask", label: "Backend" },
-  { name: "Python", icon: "SiPython", label: "Language" },
-  { name: "PyTorch", icon: "SiPytorch", label: "AI / ML" },
-  { name: "OpenCV", icon: "SiOpencv", label: "Computer Vision" },
-  { name: "YOLO", icon: "SiYolo", label: "Object Detection" },
-  { name: "Ollama", icon: "SiOllama", label: "Local LLMs" },
-  { name: "Java", icon: "SiOpenjdk", label: "Language" },
-  { name: "MySQL", icon: "SiMysql", label: "Database" },
-  { name: "MongoDB", icon: "SiMongodb", label: "Database" },
-  { name: "PostgreSQL", icon: "SiPostgresql", label: "Database" },
-  { name: "Supabase", icon: "SiSupabase", label: "Backend" },
-  { name: "AWS", icon: "FaAws", label: "Cloud" },
-  { name: "Docker", icon: "SiDocker", label: "DevOps" },
-  { name: "Git", icon: "SiGit", label: "Version Control" },
-  { name: "GitHub", icon: "SiGithub", label: "Version Control" },
-];

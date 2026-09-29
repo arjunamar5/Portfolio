@@ -94,10 +94,7 @@ export function Research() {
 
                 <SpotlightCard className="card rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-line-strong hover:translate-x-1 transition-all duration-300">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-faint mb-1">
-                      <span className="font-mono text-accent-soft whitespace-nowrap">P-{String(i + 1).padStart(2, "0")}</span>
-                      {paper.conference && <span>{paper.conference}</span>}
-                    </div>
+                    {paper.conference && <div className="text-xs text-faint mb-1">{paper.conference}</div>}
                     <div className="text-sm sm:text-base font-medium text-bone leading-snug">{paper.title}</div>
                   </div>
                   <div className="flex flex-wrap gap-1.5 shrink-0">

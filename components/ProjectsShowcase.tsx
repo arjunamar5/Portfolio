@@ -2,13 +2,13 @@
 
 import React, { useCallback, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import { Briefcase, ArrowUpRight, ArrowRight, Check, GraduationCap, TrendingUp } from "lucide-react";
+import { Briefcase, ArrowUpRight, GraduationCap } from "lucide-react";
 import { PORTFOLIO_DATA, ProjectCaseStudy } from "@/data/portfolio-data";
 import { MriVisual } from "./MriVisual";
 import { CourtVisual, StudyVisual, CompassVisual } from "./ProjectVisuals";
 import { ProjectCard } from "./ProjectCard";
 import { SectionHeading } from "./SectionHeading";
-import { CountUp } from "./CountUp";
+import { ImpactCard } from "./ImpactCard";
 import { CaseStudyModal } from "./CaseStudyModal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -79,19 +79,8 @@ function TiltStage({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** "300+" → count-up 300 with "+" suffix. */
-function Metric({ value }: { value: string }) {
-  const m = value.match(/^([+]?)(\d+(?:\.\d+)?)(.*)$/);
-  if (!m) return <>{value}</>;
-  return <CountUp value={parseFloat(m[2])} prefix={m[1]} suffix={m[3]} />;
-}
-
 function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStudy; index: number; onOpenCase: () => void }) {
   const role = PORTFOLIO_DATA.experience.find((e) => e.projectId === project.id);
-  const impact = project.impact;
-  // Big numbers only when they are real numbers; otherwise the before → after lines say it better.
-  const numeric = project.impactMetrics.filter((m) => /^\+?\d+(\.\d+)?[%+]?$/.test(m.value));
-  const rows = (impact?.rows ?? []).slice(0, numeric.length ? 3 : 4);
   const item = {
     hidden: { opacity: 0, y: 22 },
     show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
@@ -144,58 +133,23 @@ function FeaturedBlock({ project, index, onOpenCase }: { project: ProjectCaseStu
           </motion.div>
         )}
 
-        {impact && (
-          <>
-            <motion.div variants={item} className="mt-7 flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.2em] text-emerald-300">
-              <TrendingUp className="w-3.5 h-3.5" /> The impact
-            </motion.div>
-            <motion.p variants={item} className="mt-2 font-grotesk text-xl sm:text-[1.6rem] font-medium text-bone leading-snug tracking-[-0.01em] text-balance">
-              {impact.headline}
-            </motion.p>
-
-            {numeric.length > 0 && (
-              <motion.div variants={item} className="mt-6 grid grid-cols-3 gap-3">
-                {numeric.slice(0, 3).map((m) => (
-                  <div key={m.label} className="rounded-xl border border-line bg-panel/60 px-3 py-3">
-                    <div className="font-grotesk text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: project.accent }}>
-                      <Metric value={m.value} />
-                    </div>
-                    <div className="text-[11px] text-faint mt-1 leading-snug">{m.label}</div>
-                  </div>
-                ))}
-              </motion.div>
-            )}
-
-            <motion.ul variants={item} className="mt-6 space-y-2.5">
-              {rows.map((r, i) => (
-                <motion.li
-                  key={r.area}
-                  initial={{ opacity: 0, x: 16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.8 }}
-                  transition={{ duration: 0.5, delay: 0.2 + i * 0.1, ease: EASE }}
-                  className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 rounded-xl border border-line bg-panel/40 px-3.5 py-2.5"
-                >
-                  <span className="min-w-0 sm:flex-1 text-[12px] sm:text-[12.5px] text-red-300/70 line-through decoration-red-400/50 sm:truncate">{r.before}</span>
-                  <ArrowRight className="hidden sm:block w-3.5 h-3.5 shrink-0 text-faint" />
-                  <span className="min-w-0 sm:flex-[1.3] flex items-center gap-1.5 text-[13px] text-bone">
-                    <Check className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                    <span className="sm:truncate">{r.after}</span>
-                  </span>
-                </motion.li>
-              ))}
-            </motion.ul>
-          </>
-        )}
+        <motion.div variants={item}>
+          <ImpactCard project={project} />
+        </motion.div>
 
         <motion.button
           variants={item}
           onClick={onOpenCase}
-          className="group mt-7 inline-flex items-center gap-2 text-sm transition-colors hover:text-bone"
-          style={{ color: project.accent }}
+          className="group mt-6 inline-flex items-center gap-3 rounded-full border pl-5 pr-1.5 py-1.5 text-sm font-medium text-bone transition-all duration-300 hover:gap-4"
+          style={{ borderColor: `${project.accent}55`, background: `${project.accent}10` }}
         >
-          How I built it — open the case study
-          <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          How I built it
+          <span
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:rotate-45"
+            style={{ background: project.accent }}
+          >
+            <ArrowUpRight className="w-4 h-4 text-void" />
+          </span>
         </motion.button>
       </motion.div>
     </div>

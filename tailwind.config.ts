@@ -29,6 +29,7 @@ const config: Config = {
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
         grotesk: ["\"Space Grotesk Variable\"", "var(--font-geist-sans)", "system-ui", "sans-serif"],
         jakarta: ["\"Plus Jakarta Sans Variable\"", "var(--font-geist-sans)", "system-ui", "sans-serif"],
+        hand: ["\"Caveat Variable\"", "cursive"],
       },
       backgroundImage: {
         "glow-accent": "radial-gradient(circle at 50% 50%, rgba(59,130,246,0.14), transparent 65%)",

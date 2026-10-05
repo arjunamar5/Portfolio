@@ -254,7 +254,7 @@ function AppCard({
 }) {
   return (
     <div
-      className="absolute inset-0 rounded-[7cqmin] border flex flex-col overflow-hidden"
+      className="absolute inset-0 rounded-[12px] sm:rounded-[14px] border flex flex-col overflow-hidden"
       style={{
         padding: "7cqmin",
         gap: "5cqmin",
@@ -626,7 +626,7 @@ function Card({
             <item.Real />
           </motion.div>
           <motion.div
-            className="absolute inset-0 [backface-visibility:hidden] [container-type:size] overflow-hidden rounded-[7cqmin]"
+            className="absolute inset-0 [backface-visibility:hidden] [container-type:size] overflow-hidden rounded-[12px] sm:rounded-[14px]"
             style={{ transform: "rotateY(180deg)", boxShadow: flash }}
           >
             <item.App />
@@ -735,14 +735,14 @@ function BurstDot({ p, k, at }: { p: MotionValue<number>; k: number; at: { x: nu
   );
 }
 
-function Toast({ p, at, top, right, icon: Icon, c, title, sub }: { p: MotionValue<number>; at: number; top: string; right: string; icon: LucideIcon; c: string; title: string; sub: string }) {
+function Toast({ p, at, icon: Icon, c, title, sub }: { p: MotionValue<number>; at: number; icon: LucideIcon; c: string; title: string; sub: string }) {
   const t = useTransform(p, (v) => easeBack(seg(v, at, at + 0.035)));
   const x = useTransform(t, (u) => (1 - u) * 40);
   const opacity = useTransform(p, (v) => seg(v, at, at + 0.02));
   return (
     <motion.div
-      className="absolute flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0d1426]/95 backdrop-blur px-3 py-2 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.9)]"
-      style={{ top, right, x, opacity, z: 30 }}
+      className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0d1426]/95 backdrop-blur px-3 py-2 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.9)]"
+      style={{ x, opacity }}
     >
       <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${c}26` }}>
         <Icon className="w-4 h-4" style={{ color: c }} />
@@ -760,6 +760,8 @@ function Toast({ p, at, top, right, icon: Icon, c, title, sub }: { p: MotionValu
 function Stage({ p, wide, size }: { p: MotionValue<number>; wide: boolean; size: { w: number; h: number } }) {
   const F = wide ? FRAME.wide : FRAME.tall;
   const U = (v: number) => smooth(seg(v, 0.08, 0.34));
+  // Notifications shrink on small stages so they don't swallow the cards underneath.
+  const toastScale = Math.max(0.62, Math.min(1, wide ? size.w / 1000 : size.w / 420));
 
   // Pointer tilt adds a little life on top of the scroll-driven camera.
   const mx = useMotionValue(0);
@@ -816,10 +818,10 @@ function Stage({ p, wide, size }: { p: MotionValue<number>; wide: boolean; size:
     >
       <motion.div className="absolute inset-0" style={{ rotateX, rotateY, rotateZ, scale, transformStyle: "preserve-3d" }}>
         {/* Blueprint underneath the desk, revealed by the scan */}
-        <motion.div className="absolute inset-[1%] rounded-[2.2cqmin] grid-bg bg-[#071225]" style={{ opacity: grid, z: -7 }} />
+        <motion.div className="absolute inset-[1%] rounded-[18px] grid-bg bg-[#071225]" style={{ opacity: grid, z: -7 }} />
         {/* The desk */}
         <motion.div
-          className="absolute inset-[1%] rounded-[2.2cqmin] [container-type:size]"
+          className="absolute inset-[1%] rounded-[18px] [container-type:size]"
           style={{
             clipPath: deskClip,
             z: -6,
@@ -900,8 +902,13 @@ function Stage({ p, wide, size }: { p: MotionValue<number>; wide: boolean; size:
         {Array.from({ length: 10 }, (_, k) => (
           <BurstDot key={k} p={p} k={k} at={btn} />
         ))}
-        <Toast p={p} at={0.84} top={wide ? "14%" : "13.5%"} right={`${100 - F.x - F.w + 2}%`} icon={CalendarDays} c="#34D399" title="Booking confirmed" sub="Court 2 · 7:00 PM" />
-        <Toast p={p} at={0.875} top={wide ? "25%" : "21.5%"} right={`${100 - F.x - F.w + 2}%`} icon={CircleDollarSign} c="#FBBF24" title="₹1,240 received" sub="Invoice paid automatically" />
+        <motion.div
+          className="absolute flex flex-col items-end gap-2 origin-top-right"
+          style={{ top: `${F.y + F.bar + (wide ? 4 : 3)}%`, right: `${100 - F.x - F.w + 2}%`, scale: toastScale, z: 30 }}
+        >
+          <Toast p={p} at={0.84} icon={CalendarDays} c="#34D399" title="Booking confirmed" sub="Court 2 · 7:00 PM" />
+          <Toast p={p} at={0.875} icon={CircleDollarSign} c="#FBBF24" title="₹1,240 received" sub="Invoice paid automatically" />
+        </motion.div>
 
         <motion.svg
           viewBox="0 0 24 24"

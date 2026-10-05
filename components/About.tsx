@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GraduationCap, Rocket, MapPin, BookOpen, Monitor, Server, Brain, Cloud, FileText, Search, Sparkles, MessageSquare, LucideIcon } from "lucide-react";
+import { GraduationCap, Rocket, MapPin, BookOpen, Monitor, Server, Brain, Cloud, FileText, Search, Sparkles, MessageSquare, Layers, LucideIcon } from "lucide-react";
 import { SiPython, SiReact, SiNodedotjs, SiNextdotjs, SiTypescript, SiDocker, SiPostgresql, SiOllama, SiPytorch, SiMongodb, SiTailwindcss, SiSupabase, SiFlask, SiGit } from "react-icons/si";
 import { FaAws } from "react-icons/fa";
 import { PORTFOLIO_DATA } from "@/data/portfolio-data";
 import { CountUp } from "./CountUp";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-const { name, typingTitles, education, location } = PORTFOLIO_DATA.personal;
+const { education, location } = PORTFOLIO_DATA.personal;
 const cgpa = parseFloat(education.detail.replace("CGPA: ", ""));
 const LIVE_IDS = ["project-3-cue-court-coffee", "project-2-perfect-study-space", "project-7-alpenglow-global"];
 const LIVE = LIVE_IDS.map((id) => PORTFOLIO_DATA.projects.find((p) => p.id === id)).filter((p): p is (typeof PORTFOLIO_DATA.projects)[number] => Boolean(p));
@@ -64,29 +64,140 @@ function Label({ children }: { children: React.ReactNode }) {
   return <div className="font-mono text-[10.5px] uppercase tracking-[0.25em] text-faint">{children}</div>;
 }
 
-/** Cycles through the role titles with a soft vertical swap. */
-function RotatingTitle() {
-  const [i, setI] = useState(0);
+/** The three things I build with; the diagram shows where they overlap. */
+const REALMS: { label: string; I: LucideIcon; c: string; line: string; tools: string[]; at: { x: number; y: number }; tag: React.CSSProperties; drift: [number, number] }[] = [
+  { label: "Full-stack", I: Layers, c: "#38BDF8", line: "Apps people use every day", tools: ["React", "Next.js", "Node.js", "SQL"], at: { x: 50, y: 35 }, tag: { left: "50%", top: "0%", transform: "translate(-50%,-30%)" }, drift: [0, -6] },
+  { label: "Cloud", I: Cloud, c: "#FB923C", line: "Shipped, scaled, always on", tools: ["AWS", "Docker"], at: { x: 34, y: 63 }, tag: { left: "2%", bottom: "0%", transform: "translateY(30%)" }, drift: [-6, 4] },
+  { label: "AI", I: Brain, c: "#C084FC", line: "Intelligence built in", tools: ["LLMs", "RAG", "Ollama", "PyTorch"], at: { x: 66, y: 63 }, tag: { right: "2%", bottom: "0%", transform: "translateY(30%)" }, drift: [6, 4] },
+];
+
+function useRealmCycle() {
+  const [active, setActive] = useState(0);
+  const [held, setHeld] = useState(false);
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setI((v) => (v + 1) % typingTitles.length), 2400);
+    if (held || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => setActive((v) => (v + 1) % REALMS.length), 2600);
     return () => clearInterval(id);
-  }, []);
+  }, [held]);
+  const focus = (i: number | null) => {
+    setHeld(i !== null);
+    if (i !== null) setActive(i);
+  };
+  return { active, focus };
+}
+
+/** Three glowing circles drifting over each other; the bright overlap in the middle is "me". */
+function Realms({ active, focus }: { active: number; focus: (i: number | null) => void }) {
   return (
-    <span className="relative inline-flex h-[1.45em] overflow-hidden align-bottom">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={typingTitles[i]}
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: "0%", opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
-          transition={{ duration: 0.5, ease: EASE }}
-          className="block whitespace-nowrap bg-gradient-to-r from-neon via-accent-soft to-fuchsia-300 bg-clip-text text-transparent font-semibold"
-        >
-          {typingTitles[i]}
-        </motion.span>
-      </AnimatePresence>
-    </span>
+    <div className="relative mx-auto aspect-square w-full max-w-[300px]" onMouseLeave={() => focus(null)}>
+      {REALMS.map((r, i) => {
+        const on = i === active;
+        return (
+          <motion.div
+            key={r.label}
+            onMouseEnter={() => focus(i)}
+            className="absolute w-[62%] aspect-square rounded-full cursor-default mix-blend-screen"
+            style={{
+              left: `${r.at.x}%`,
+              top: `${r.at.y}%`,
+              x: "-50%",
+              y: "-50%",
+              background: `radial-gradient(circle at 50% 50%, ${r.c}5c, ${r.c}26 55%, ${r.c}0d 70%)`,
+              border: `1px solid ${r.c}${on ? "cc" : "55"}`,
+              boxShadow: on ? `0 0 50px -6px ${r.c}, inset 0 0 40px ${r.c}40` : "none",
+            }}
+            animate={{ translateX: [0, r.drift[0], 0], translateY: [0, r.drift[1], 0], scale: on ? 1.06 : 1, opacity: on ? 1 : 0.6 }}
+            transition={{
+              translateX: { duration: 6 + i, repeat: Infinity, ease: "easeInOut" },
+              translateY: { duration: 6 + i, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 0.6, ease: EASE },
+              opacity: { duration: 0.6 },
+            }}
+          />
+        );
+      })}
+
+      {/* labels on the outside of each circle */}
+      {REALMS.map((r, i) => {
+        const on = i === active;
+        return (
+          <button
+            key={r.label}
+            onMouseEnter={() => focus(i)}
+            onFocus={() => focus(i)}
+            onBlur={() => focus(null)}
+            className="absolute z-10 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-semibold backdrop-blur transition-all duration-500"
+            style={{ ...r.tag, color: on ? "#fff" : r.c, borderColor: `${r.c}${on ? "cc" : "55"}`, background: on ? `${r.c}40` : "rgba(7,10,18,0.7)" }}
+          >
+            <r.I className="w-3.5 h-3.5" /> {r.label}
+          </button>
+        );
+      })}
+
+      {/* the overlap */}
+      <div className="absolute z-10 left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+        <span className="relative flex w-3.5 h-3.5">
+          <span className="absolute inline-flex w-full h-full rounded-full bg-white opacity-60 animate-ping" />
+          <span className="relative inline-flex w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_18px_4px_rgba(255,255,255,0.8)]" />
+        </span>
+        <span className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-white/90">me</span>
+      </div>
+    </div>
+  );
+}
+
+function RealmsIntro() {
+  const { active, focus } = useRealmCycle();
+  const r = REALMS[active];
+  return (
+    <div className="relative h-full grid sm:grid-cols-[1fr_minmax(0,300px)] items-center gap-8">
+      <div className="h-full flex flex-col">
+        <span className="font-mono text-xs uppercase tracking-[0.3em] text-white/70">Where I work</span>
+        <h2 className="mt-3 font-grotesk text-[2.3rem] sm:text-[2.9rem] font-bold leading-[1] tracking-[-0.04em]">
+          {REALMS.map((x, i) => (
+            <span
+              key={x.label}
+              onMouseEnter={() => focus(i)}
+              onMouseLeave={() => focus(null)}
+              className="block w-fit cursor-default transition-all duration-500"
+              style={{ color: i === active ? x.c : "rgba(242,244,248,0.28)", textShadow: i === active ? `0 0 30px ${x.c}66` : "none" }}
+            >
+              {i === REALMS.length - 1 ? `& ${x.label}.` : `${x.label},`}
+            </span>
+          ))}
+        </h2>
+        <p className="mt-3 text-[15px] text-white/70">I build right where they meet.</p>
+        <div className="relative mt-4 min-h-[62px]">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={r.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.35, ease: EASE }}>
+              <div className="text-[13px] font-medium" style={{ color: r.c }}>
+                {r.line}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {r.tools.map((t) => (
+                  <span key={t} className="rounded-full border px-2.5 py-0.5 text-[11.5px] text-white/90" style={{ borderColor: `${r.c}55`, background: `${r.c}14` }}>
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <div className="mt-auto flex flex-wrap gap-2 pt-5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur px-3 py-1.5 text-[12.5px] text-white">
+            <MapPin className="w-3.5 h-3.5" /> {location}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur px-3 py-1.5 text-[12.5px] text-white">
+            <span className="relative flex w-1.5 h-1.5">
+              <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            </span>
+            Building something new
+          </span>
+        </div>
+      </div>
+      <Realms active={active} focus={focus} />
+    </div>
   );
 }
 
@@ -217,33 +328,10 @@ export function About() {
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-12 gap-4 md:auto-rows-[minmax(150px,auto)]">
           {/* Intro */}
-          <Tile i={0} glow="#6366F1" className="md:col-span-7 md:row-span-2 min-h-[320px] !p-7 sm:!p-9">
-            <div className="about-mesh pointer-events-none absolute inset-0" />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.10] mix-blend-overlay bg-[repeating-radial-gradient(circle_at_30%_20%,#fff_0_1px,transparent_1px_3px)]" />
-            <div className="pointer-events-none absolute -right-20 -bottom-24 w-[340px] h-[340px] rounded-full border border-white/10" />
-            <div className="pointer-events-none absolute -right-8 -bottom-12 w-[220px] h-[220px] rounded-full border border-white/10" />
-            <div className="relative h-full flex flex-col">
-              <span className="font-mono text-xs uppercase tracking-[0.3em] text-white/70">Hi, I&apos;m</span>
-              <h2 className="mt-3 font-grotesk text-[2.5rem] sm:text-[3.5rem] font-bold leading-[0.95] tracking-[-0.04em] text-white">{name}</h2>
-              <p className="mt-4 text-lg sm:text-xl text-white/85">
-                <RotatingTitle />
-              </p>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/65 max-w-[470px]">
-                A Computer Science graduate who builds full-stack products with AI inside, and ships them to real businesses.
-              </p>
-              <div className="mt-auto flex flex-wrap gap-2 pt-7">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur px-3 py-1.5 text-[12.5px] text-white">
-                  <MapPin className="w-3.5 h-3.5" /> {location}
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur px-3 py-1.5 text-[12.5px] text-white">
-                  <span className="relative flex w-1.5 h-1.5">
-                    <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                    <span className="relative inline-flex w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  </span>
-                  Building something new
-                </span>
-              </div>
-            </div>
+          <Tile i={0} glow="#6366F1" className="md:col-span-7 md:row-span-2 min-h-[320px] !p-7 sm:!p-8">
+            <div className="about-mesh pointer-events-none absolute inset-0 opacity-50" />
+            <div className="pointer-events-none absolute inset-0 grid-bg opacity-30" />
+            <RealmsIntro />
           </Tile>
 
           {/* Education */}

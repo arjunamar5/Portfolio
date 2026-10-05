@@ -199,7 +199,7 @@ export function About() {
 
           {/* Education */}
           <Tile i={1} glow="#22D3EE" className="md:col-span-5 md:row-span-2">
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col justify-center">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <span className="w-10 h-10 rounded-xl flex items-center justify-center bg-neon/10 border border-neon/30">
@@ -217,28 +217,6 @@ export function About() {
                     </span>
                     <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-faint mt-1">CGPA</span>
                   </div>
-                </div>
-              </div>
-              {/* 2022 → 2026 timeline */}
-              <div className="mt-auto pt-5">
-                <div className="relative h-1.5 rounded-full bg-white/[0.07]">
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.6, delay: 0.2, ease: EASE }}
-                    className="absolute inset-0 origin-left rounded-full bg-gradient-to-r from-neon to-indigo-400"
-                  />
-                  {[0, 25, 50, 75, 100].map((x) => (
-                    <span key={x} className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-[#0A0F1C] border-2 border-neon" style={{ left: `${x}%` }} />
-                  ))}
-                </div>
-                <div className="mt-2.5 flex justify-between font-mono text-[10.5px] text-faint">
-                  <span>2022</span>
-                  <span>2023</span>
-                  <span>2024</span>
-                  <span>2025</span>
-                  <span className="text-neon">2026</span>
                 </div>
               </div>
             </div>

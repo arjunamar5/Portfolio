@@ -643,54 +643,27 @@ function Card({
 
 /* ---------------- heading words that react to the scroll ---------------- */
 
-const MESSY = "real-world problems";
-
-function MessyChar({ ch, i, t }: { ch: string; i: number; t: MotionValue<number> }) {
-  // Deterministic "random" jumble per letter; it straightens as t → 1.
-  const r = Math.sin(i * 12.9898) * 43758.5453;
-  const n = r - Math.floor(r);
-  const n2 = (Math.sin(i * 78.233) * 12345.678) % 1;
-  const rotate = useTransform(t, (v) => (n - 0.5) * 34 * (1 - v));
-  const y = useTransform(t, (v) => `${(n2 - 0.5) * 0.32 * (1 - v)}em`);
-  const color = useTransform(t, [0, 1], [n > 0.5 ? "#FDBA74" : "#FB923C", "#F2F4F8"]);
-  if (ch === " ") return <span> </span>;
-  return (
-    <motion.span className="inline-block" style={{ rotate, y, color }}>
-      {ch}
-    </motion.span>
-  );
-}
-
 function ProblemWords({ p }: { p: MotionValue<number> }) {
   const t = useTransform(p, (v) => smooth(seg(v, 0.06, 0.32)));
-  // The squiggle underneath straightens out with the letters.
+  // A soft wave under the words that calms into a straight line as the mess is untangled.
   const d = useTransform(t, (u) => {
-    const pts = Array.from({ length: 25 }, (_, i) => {
-      const x = (i / 24) * 300;
-      const y = 10 + Math.sin(i * 1.7) * 7 * (1 - u) + Math.cos(i * 0.9) * 3 * (1 - u);
-      return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+    const amp = 4.5 * (1 - u);
+    const pts = Array.from({ length: 61 }, (_, i) => {
+      const x = (i / 60) * 300;
+      const y = 10 + Math.sin((i / 60) * Math.PI * 6) * amp;
+      return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(2)}`;
     });
     return pts.join(" ");
   });
+  const color = useTransform(t, [0, 1], ["#FDBA74", "#F2F4F8"]);
   const stroke = useTransform(t, [0, 1], ["#FB923C", "#38BDF8"]);
-  const words = MESSY.split(" ");
-  let idx = 0;
   return (
-    <span className="relative inline-block">
-      {words.map((w, wi) => (
-        <React.Fragment key={w}>
-          <span className="inline-block whitespace-nowrap">
-            {w.split("").map((ch) => (
-              <MessyChar key={idx} ch={ch} i={idx++} t={t} />
-            ))}
-          </span>
-          {wi < words.length - 1 && " "}
-        </React.Fragment>
-      ))}
-      <svg viewBox="0 0 300 20" preserveAspectRatio="none" className="absolute left-0 -bottom-[0.2em] w-full h-[0.36em] overflow-visible" aria-hidden>
-        <motion.path d={d} fill="none" style={{ stroke }} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    <motion.span className="relative inline-block whitespace-nowrap" style={{ color }}>
+      real-world problems
+      <svg viewBox="0 0 300 20" preserveAspectRatio="none" className="absolute left-0 -bottom-[0.2em] w-full h-[0.3em] overflow-visible" aria-hidden>
+        <motion.path d={d} fill="none" style={{ stroke }} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
       </svg>
-    </span>
+    </motion.span>
   );
 }
 

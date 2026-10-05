@@ -64,7 +64,16 @@ function Keycap({ k, pressed, done, onPress }: { k: Key; pressed: boolean; done:
           <span className="font-mono text-[11px] font-semibold text-white/40 hidden md:block">{k.hotkey}</span>
           <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: k.c, boxShadow: `0 0 8px 2px ${k.c}` }} />
         </span>
-        <Icon className="w-7 h-7 sm:w-8 sm:h-8 self-center transition-transform duration-300 group-hover:scale-110" style={{ color: k.c }} />
+        <span
+          className="self-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"
+          style={{
+            background: `linear-gradient(145deg, ${k.c}40, ${k.c}12)`,
+            borderColor: `${k.c}80`,
+            boxShadow: `0 0 28px -4px ${k.c}cc, inset 0 1px 0 rgba(255,255,255,0.18)`,
+          }}
+        >
+          <Icon className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: "#fff", filter: `drop-shadow(0 0 8px ${k.c})` }} />
+        </span>
         <span>
           <span className="block font-grotesk text-[15px] sm:text-base font-semibold text-white leading-tight">{done ? "Copied!" : k.label}</span>
           <span className="block font-mono text-[10.5px] sm:text-[11px] text-white/45 mt-0.5 truncate">{k.hint}</span>

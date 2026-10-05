@@ -4,6 +4,7 @@ import React from "react";
 import { Mail } from "lucide-react";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import { PORTFOLIO_DATA } from "@/data/portfolio-data";
+import { Signature } from "./Signature";
 
 export function Footer() {
   const { name, email, linkedin, github } = PORTFOLIO_DATA.personal;
@@ -17,6 +18,9 @@ export function Footer() {
   return (
     <footer className="relative bg-void border-t border-line py-10 overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+      <div className="flex justify-center pt-6 pb-14 sm:pb-16">
+        <Signature />
+      </div>
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10 flex flex-wrap items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent via-neon to-fuchsia-400 p-px">

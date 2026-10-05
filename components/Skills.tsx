@@ -48,14 +48,15 @@ const TOOL: Record<string, { icon?: React.ComponentType<{ className?: string; st
 
 type Domain = { group: string; title: string; sub: string; icon: LucideIcon; from: string; to: string; span: string };
 
+// Three rows on desktop: two halves, three thirds, two halves.
 const DOMAINS: Domain[] = [
   { group: "Frontend", title: "Frontend", sub: "Interfaces people enjoy", icon: Layout, from: "#38BDF8", to: "#6366F1", span: "lg:col-span-3" },
-  { group: "AI-ML & GenAI", title: "AI · ML & GenAI", sub: "Vision models, LLMs & RAG", icon: Sparkles, from: "#E879F9", to: "#8B5CF6", span: "lg:col-span-3" },
-  { group: "Backend", title: "Backend & APIs", sub: "Logic & integrations", icon: Server, from: "#34D399", to: "#059669", span: "lg:col-span-2" },
+  { group: "Backend", title: "Backend & APIs", sub: "Logic & integrations", icon: Server, from: "#34D399", to: "#059669", span: "lg:col-span-3" },
+  { group: "Version Control", title: "Version Control", sub: "Change, safely", icon: GitBranch, from: "#F472B6", to: "#F43F5E", span: "lg:col-span-2" },
   { group: "Database", title: "Databases", sub: "Data that stays put", icon: Database, from: "#FBBF24", to: "#F97316", span: "lg:col-span-2" },
-  { group: "Cloud Technologies", title: "Cloud & DevOps", sub: "Ship it, keep it up", icon: Cloud, from: "#FB923C", to: "#F43F5E", span: "lg:col-span-2" },
-  { group: "Languages", title: "Languages", sub: "What I write in", icon: Code2, from: "#A5B4FC", to: "#3B82F6", span: "lg:col-span-4" },
-  { group: "Version Control", title: "Version Control", sub: "Change, safely", icon: GitBranch, from: "#F472B6", to: "#F43F5E", span: "sm:col-span-2 lg:col-span-2" },
+  { group: "Cloud Technologies", title: "Cloud & DevOps", sub: "Ship it, keep it up", icon: Cloud, from: "#FB923C", to: "#F43F5E", span: "sm:col-span-2 lg:col-span-2" },
+  { group: "AI-ML & GenAI", title: "AI · ML & GenAI", sub: "Vision models, LLMs & RAG", icon: Sparkles, from: "#E879F9", to: "#8B5CF6", span: "lg:col-span-3" },
+  { group: "Languages", title: "Languages", sub: "What I write in", icon: Code2, from: "#A5B4FC", to: "#3B82F6", span: "lg:col-span-3" },
 ];
 
 function Tile({ name, i }: { name: string; i: number }) {
@@ -121,12 +122,6 @@ function DomainCard({ d, tools, i }: { d: Domain; tools: string[]; i: number }) 
             <div className="text-base font-semibold text-bone">{d.title}</div>
             <div className="text-xs text-dim">{d.sub}</div>
           </div>
-          <span
-            className="ml-auto font-mono text-[11px] rounded-full px-2 py-0.5 border"
-            style={{ color: d.from, borderColor: `${d.from}55`, background: `${d.from}14` }}
-          >
-            {String(tools.length).padStart(2, "0")}
-          </span>
         </div>
         <motion.div
           initial="hidden"

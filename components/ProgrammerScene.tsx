@@ -96,9 +96,12 @@ export const ANCHOR_COUNT = 6; // diploma, laptop, trophy, AI orb, wall monitor,
 export default function ProgrammerScene({
   onAnchors,
   focusRef,
+  variant = "room",
 }: {
   onAnchors?: (pts: { x: number; y: number }[]) => void;
   focusRef?: React.MutableRefObject<number | null>;
+  /** "portrait": just him, head and shoulders, looking at the viewer (no room, no dragging). */
+  variant?: "room" | "portrait";
 }) {
   const mountRef = useRef<HTMLDivElement>(null);
 
@@ -753,6 +756,20 @@ export default function ProgrammerScene({
     );
     scene.add(points);
 
+    // ---------- Portrait: hide the room and props, light the face from the front ----------
+    const portrait = variant === "portrait";
+    if (portrait) {
+      scene.children.forEach((c) => {
+        if (c !== body && !(c as THREE.Light).isLight) c.visible = false;
+      });
+      const faceLight = new THREE.PointLight("#ffe7d1", 1.8, 4.5, 1.4);
+      faceLight.position.set(0.7, 1.95, 1.5);
+      scene.add(faceLight);
+      const backLight = new THREE.PointLight("#a855f7", 2.2, 3.2, 1.4);
+      backLight.position.set(-0.7, 2.1, -1.0);
+      scene.add(backLight);
+    }
+
     // ---------- Interaction ----------
     let mouseX = 0;
     let mouseY = 0;
@@ -770,7 +787,7 @@ export default function ProgrammerScene({
     let lastY = 0;
     const canvas = renderer.domElement;
     canvas.style.touchAction = "pan-y";
-    canvas.style.cursor = "grab";
+    canvas.style.cursor = portrait ? "default" : "grab";
     const onDown = (e: PointerEvent) => {
       dragging = true;
       lastX = e.clientX;
@@ -793,10 +810,12 @@ export default function ProgrammerScene({
       dragging = false;
       canvas.style.cursor = "grab";
     };
-    canvas.addEventListener("pointerdown", onDown);
-    canvas.addEventListener("pointermove", onMove);
-    canvas.addEventListener("pointerup", onUp);
-    canvas.addEventListener("pointercancel", onUp);
+    if (!portrait) {
+      canvas.addEventListener("pointerdown", onDown);
+      canvas.addEventListener("pointermove", onMove);
+      canvas.addEventListener("pointerup", onUp);
+      canvas.addEventListener("pointercancel", onUp);
+    }
 
     const resize = () => {
       const w = mount.clientWidth;
@@ -827,9 +846,16 @@ export default function ProgrammerScene({
         vel *= 0.92;
         dragAz = Math.max(-0.32, Math.min(0.55, dragAz + vel));
       }
-      const az = 0.62 + (reduce ? 0 : Math.sin(t * 0.25) * 0.07) + mouseX * 0.08 + dragAz;
-      const el = 0.36 + mouseY * 0.03 + dragEl;
-      const R = 10.4;
+      let az = 0.62 + (reduce ? 0 : Math.sin(t * 0.25) * 0.07) + mouseX * 0.08 + dragAz;
+      let el = 0.36 + mouseY * 0.03 + dragEl;
+      let R = 10.4;
+      if (portrait) {
+        // Head-and-shoulders framing, drifting gently with the pointer.
+        az = 0.22 + (reduce ? 0 : Math.sin(t * 0.3) * 0.04) + mouseX * 0.1;
+        el = 0.1 + mouseY * 0.04;
+        R = 3.3;
+        target.set(0, 1.6, -0.12);
+      }
       camera.position.set(target.x + Math.sin(az) * Math.cos(el) * R, target.y + Math.sin(el) * R, target.z + Math.cos(az) * Math.cos(el) * R);
       camera.lookAt(target);
 
@@ -838,8 +864,9 @@ export default function ProgrammerScene({
       torso.scale.set(1 + breath * 0.5, 1 + breath, 1 + breath * 0.5);
       // Head: look at the highlighted object, else follow the pointer; small nod while reading.
       const focus = focusRef?.current ?? null;
-      let wantYaw = mouseX * 0.35;
-      let wantPitch = 0;
+      // In the portrait he looks out at the viewer and follows the pointer.
+      let wantYaw = portrait ? 0.2 + mouseX * 0.45 : mouseX * 0.35;
+      let wantPitch = portrait ? -0.12 + mouseY * 0.1 : 0;
       if (focus !== null) {
         head.getWorldPosition(headPos);
         const pp = focus === 3 ? orb.position : new THREE.Vector3(...PINS[focus]);
@@ -850,21 +877,35 @@ export default function ProgrammerScene({
       pitch += (wantPitch - pitch) * 0.07;
       head.rotation.set(0.08 + pitch + Math.sin(t * 1.3) * 0.03, yaw, Math.sin(t * 0.7) * 0.02);
 
-      // Typing: hands tap alternately; elbows follow.
-      const tapL = reduce ? 0 : Math.max(0, Math.sin(t * 13)) * 0.02;
-      const tapR = reduce ? 0 : Math.max(0, Math.sin(t * 13 + 2.2)) * 0.02;
-      const hl: V3 = [0.14 + Math.sin(t * 3.1) * 0.02, baseTop + 0.07 + tapL, 0.34];
-      const hr: V3 = [-0.14 + Math.sin(t * 2.7) * 0.02, baseTop + 0.07 + tapR, 0.34];
-      handL.position.set(...hl);
-      handR.position.set(...hr);
       const shL: V3 = [0.29, 1.34, -0.24];
       const shR: V3 = [-0.29, 1.34, -0.24];
-      const elL: V3 = [0.33, 1.05 + breath, -0.02];
-      const elR: V3 = [-0.33, 1.05 + breath, -0.02];
-      upperL(shL, elL);
-      upperR(shR, elR);
-      foreL(elL, [hl[0], hl[1] + 0.01, hl[2] - 0.04]);
-      foreR(elR, [hr[0], hr[1] + 0.01, hr[2] - 0.04]);
+      if (portrait) {
+        // Arms crossed over the chest.
+        const elL: V3 = [0.3, 1.02 + breath, -0.04];
+        const elR: V3 = [-0.3, 1.0 + breath, -0.02];
+        const hl: V3 = [-0.2, 1.16 + breath, 0.02];
+        const hr: V3 = [0.2, 1.1 + breath, 0.06];
+        upperL(shL, elL);
+        upperR(shR, elR);
+        foreL(elL, hl);
+        foreR(elR, hr);
+        handL.position.set(...hl);
+        handR.position.set(...hr);
+      } else {
+        // Typing: hands tap alternately; elbows follow.
+        const tapL = reduce ? 0 : Math.max(0, Math.sin(t * 13)) * 0.02;
+        const tapR = reduce ? 0 : Math.max(0, Math.sin(t * 13 + 2.2)) * 0.02;
+        const hl: V3 = [0.14 + Math.sin(t * 3.1) * 0.02, baseTop + 0.07 + tapL, 0.34];
+        const hr: V3 = [-0.14 + Math.sin(t * 2.7) * 0.02, baseTop + 0.07 + tapR, 0.34];
+        handL.position.set(...hl);
+        handR.position.set(...hr);
+        const elL: V3 = [0.33, 1.05 + breath, -0.02];
+        const elR: V3 = [-0.33, 1.05 + breath, -0.02];
+        upperL(shL, elL);
+        upperR(shR, elR);
+        foreL(elL, [hl[0], hl[1] + 0.01, hl[2] - 0.04]);
+        foreR(elR, [hr[0], hr[1] + 0.01, hr[2] - 0.04]);
+      }
 
       // Screen code (≈8 fps is plenty), lamp flicker, steam, glyphs, particles.
       if (!reduce && now - lastDraw > 120) {
@@ -939,7 +980,7 @@ export default function ProgrammerScene({
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onPointer);
-      canvas.removeEventListener("pointerdown", onDown);
+      if (!portrait) canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onUp);
@@ -947,7 +988,7 @@ export default function ProgrammerScene({
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [onAnchors, focusRef]);
+  }, [onAnchors, focusRef, variant]);
 
-  return <div ref={mountRef} className="absolute inset-0" aria-label="3D studio room — drag to look around" />;
+  return <div ref={mountRef} className="absolute inset-0" aria-label={variant === "portrait" ? "3D portrait of Arjun" : "3D studio room — drag to look around"} />;
 }

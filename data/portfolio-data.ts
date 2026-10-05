@@ -76,6 +76,7 @@ export const PORTFOLIO_DATA = {
     location: "Coimbatore, India",
     email: "arjunamarnath1008@gmail.com",
     linkedin: "https://linkedin.com/in/arjun-r-amarnath",
+    github: "https://github.com/arjunamar5",
     resumeUrl: "/Arjun_R_Amarnath_Resume.pdf",
     bioShort: "Computer Science graduate building full-stack products and LLM-powered applications — from RAG systems to cloud-deployed platforms used by real businesses.",
     summary:

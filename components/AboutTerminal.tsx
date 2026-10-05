@@ -11,7 +11,6 @@ const CMD = "neofetch";
 const LOGO = ["      /\\      ", "     /  \\     ", "    / /\\ \\    ", "   / ____ \\   ", "  /_/    \\_\\  "];
 
 const INFO: [string, string][] = [
-  ["role", "Full-stack + AI dev"],
   ["builds", "Websites · SaaS · AI stuff"],
   ["learning", "LLMs · RAG · Cloud"],
   ["likes", "Clean UI · Fast apps · Good coffee"],

@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useTransform,
   useSpring,
@@ -20,6 +21,7 @@ import {
   TrendingUp,
   ListChecks,
   Check,
+  CircleDollarSign,
   LucideIcon,
 } from "lucide-react";
 
@@ -28,15 +30,21 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const seg = (v: number, a: number, b: number) => clamp01((v - a) / (b - a));
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+/** Ease out with a small overshoot, so objects "snap" into place. */
+const easeBack = (t: number) => {
+  const c1 = 1.25;
+  return 1 + (c1 + 1) * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+};
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 /* Timeline (scroll progress 0 → 1):
    0.00 mess on a tilted desk · 0.10–0.34 untangle (desk turns to face you, objects snap to a plan)
    0.36–0.70 build (each object flips into its software twin) · 0.64–0.86 ship (app frame, deploy click, live) */
 const STEPS = [
-  { at: 0, label: "Problem" },
-  { at: 0.1, label: "Untangle" },
-  { at: 0.36, label: "Build" },
-  { at: 0.66, label: "Ship" },
+  { at: 0, end: 0.1, label: "Problem", c: "#FB923C", line: "It starts with a mess: notes, missed calls, sheets nobody trusts." },
+  { at: 0.1, end: 0.36, label: "Untangle", c: "#38BDF8", line: "First, I map the chaos into a clear plan." },
+  { at: 0.36, end: 0.66, label: "Build", c: "#818CF8", line: "Then every piece becomes software." },
+  { at: 0.66, end: 0.92, label: "Ship", c: "#34D399", line: "Deployed, live, and used every day." },
 ];
 
 type Box = { x: number; y: number; w: number; h: number; r?: number };
@@ -577,69 +585,56 @@ function Card({
 }) {
   const m = wide ? item.mess.wide : item.mess.tall;
   const s = wide ? item.slot.wide : item.slot.tall;
-  const u = (v: number) => smooth(seg(v, 0.1 + i * 0.014, 0.32 + i * 0.014));
+  const uRaw = (v: number) => seg(v, 0.1 + i * 0.016, 0.3 + i * 0.016);
+  const u = (v: number) => easeBack(uRaw(v));
+  // 0 → 1 → 0 while an object travels: it lifts off the desk in an arc.
+  const lift = (v: number) => Math.sin(uRaw(v) * Math.PI);
   const f0 = 0.36 + i * 0.045;
   const f = (v: number) => seg(v, f0, f0 + 0.11);
   // Size changes while the card is edge-on, so the swap is invisible.
   const k = (v: number) => smooth(seg(f(v), 0.32, 0.68));
   const left = useTransform(p, (v) => `${lerp(m.x, s.x, u(v))}%`);
-  const top = useTransform(p, (v) => `${lerp(m.y, s.y, u(v))}%`);
+  const top = useTransform(p, (v) => `${lerp(m.y, s.y, u(v)) - lift(v) * 5}%`);
   const width = useTransform(p, (v) => `${lerp(m.w, s.w, k(v))}%`);
   const height = useTransform(p, (v) => `${lerp(m.h, s.h, k(v))}%`);
   const rotateZ = useTransform(p, (v) => (m.r ?? 0) * (1 - u(v)));
-  const z = useTransform(
-    p,
-    (v) => Math.sin(u(v) * Math.PI) * 70 + Math.sin(f(v) * Math.PI) * 60,
-  );
-  const rotateY = useTransform(p, (v) => f(v) * 180);
+  const z = useTransform(p, (v) => lift(v) * 90 + Math.sin(f(v) * Math.PI) * 70);
+  const scale = useTransform(p, (v) => 1 + lift(v) * 0.06 + Math.sin(f(v) * Math.PI) * 0.07);
+  const rotateY = useTransform(p, (v) => easeBack(f(v)) * 180);
   const wobble = useTransform(p, (v) => 1 - seg(v, 0.04, 0.12));
-  const glint = useTransform(
-    p,
-    (v) => `${lerp(-60, 160, seg(v, f0 + 0.1, f0 + 0.16))}%`,
-  );
+  const shadow = useTransform(p, (v) => {
+    const l = lift(v);
+    return `drop-shadow(0 ${4 + l * 26}px ${6 + l * 26}px rgba(0,0,0,${0.3 + l * 0.35}))`;
+  });
+  const glint = useTransform(p, (v) => `${lerp(-60, 160, seg(v, f0 + 0.09, f0 + 0.16))}%`);
+  const flash = useTransform(p, (v) => {
+    const g = seg(v, f0 + 0.08, f0 + 0.12) * (1 - seg(v, f0 + 0.12, f0 + 0.22));
+    return `0 0 0 1.5px rgba(186,230,253,${g * 0.75}), 0 0 46px rgba(96,165,250,${g * 0.55})`;
+  });
 
   return (
     <motion.div
       className="absolute"
-      style={{
-        left,
-        top,
-        width,
-        height,
-        x: "-50%",
-        y: "-50%",
-        rotateZ,
-        z,
-        transformStyle: "preserve-3d",
-      }}
+      style={{ left, top, width, height, x: "-50%", y: "-50%", rotateZ, z, scale, transformStyle: "preserve-3d" }}
     >
       <motion.div
         className="flip-wobble relative w-full h-full"
-        style={
-          {
-            ["--w" as string]: wobble,
-            transformStyle: "preserve-3d",
-            animationDelay: `${-i * 0.6}s`,
-          } as never
-        }
+        style={{ ["--w" as string]: wobble, transformStyle: "preserve-3d", animationDelay: `${-i * 0.6}s` } as never}
       >
-        <motion.div
-          className="relative w-full h-full"
-          style={{ rotateY, transformStyle: "preserve-3d" }}
-        >
-          <div className="absolute inset-0 [backface-visibility:hidden] [container-type:size]">
+        <motion.div className="relative w-full h-full" style={{ rotateY, transformStyle: "preserve-3d" }}>
+          <motion.div className="absolute inset-0 [backface-visibility:hidden] [container-type:size]" style={{ filter: shadow }}>
             <item.Real />
-          </div>
-          <div
+          </motion.div>
+          <motion.div
             className="absolute inset-0 [backface-visibility:hidden] [container-type:size] overflow-hidden rounded-[7cqmin]"
-            style={{ transform: "rotateY(180deg)" }}
+            style={{ transform: "rotateY(180deg)", boxShadow: flash }}
           >
             <item.App />
             <motion.span
               className="pointer-events-none absolute inset-y-0 w-[40%] -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent"
               style={{ left: glint }}
             />
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </motion.div>
@@ -648,71 +643,121 @@ function Card({
 
 /* ---------------- heading words that react to the scroll ---------------- */
 
+const MESSY = "real-world problems";
+
+function MessyChar({ ch, i, t }: { ch: string; i: number; t: MotionValue<number> }) {
+  // Deterministic "random" jumble per letter; it straightens as t → 1.
+  const r = Math.sin(i * 12.9898) * 43758.5453;
+  const n = r - Math.floor(r);
+  const n2 = (Math.sin(i * 78.233) * 12345.678) % 1;
+  const rotate = useTransform(t, (v) => (n - 0.5) * 34 * (1 - v));
+  const y = useTransform(t, (v) => `${(n2 - 0.5) * 0.32 * (1 - v)}em`);
+  const color = useTransform(t, [0, 1], [n > 0.5 ? "#FDBA74" : "#FB923C", "#F2F4F8"]);
+  if (ch === " ") return <span> </span>;
+  return (
+    <motion.span className="inline-block" style={{ rotate, y, color }}>
+      {ch}
+    </motion.span>
+  );
+}
+
 function ProblemWords({ p }: { p: MotionValue<number> }) {
-  // The squiggle under "real-world problems" straightens out as the mess is untangled.
-  const d = useTransform(p, (v) => {
-    const t = smooth(seg(v, 0.08, 0.34));
+  const t = useTransform(p, (v) => smooth(seg(v, 0.06, 0.32)));
+  // The squiggle underneath straightens out with the letters.
+  const d = useTransform(t, (u) => {
     const pts = Array.from({ length: 25 }, (_, i) => {
       const x = (i / 24) * 300;
-      const y =
-        10 + Math.sin(i * 1.7) * 7 * (1 - t) + Math.cos(i * 0.9) * 3 * (1 - t);
+      const y = 10 + Math.sin(i * 1.7) * 7 * (1 - u) + Math.cos(i * 0.9) * 3 * (1 - u);
       return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
     });
     return pts.join(" ");
   });
-  const stroke = useTransform(p, [0.08, 0.34], ["#FB923C", "#60A5FA"]);
+  const stroke = useTransform(t, [0, 1], ["#FB923C", "#38BDF8"]);
+  const words = MESSY.split(" ");
+  let idx = 0;
   return (
-    <span className="relative inline-block whitespace-nowrap text-orange-300">
-      real-world problems
-      <svg
-        viewBox="0 0 300 20"
-        preserveAspectRatio="none"
-        className="absolute left-0 -bottom-[0.28em] w-full h-[0.4em] overflow-visible"
-        aria-hidden
-      >
-        <motion.path
-          d={d}
-          fill="none"
-          style={{ stroke }}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
+    <span className="relative inline-block">
+      {words.map((w, wi) => (
+        <React.Fragment key={w}>
+          <span className="inline-block whitespace-nowrap">
+            {w.split("").map((ch) => (
+              <MessyChar key={idx} ch={ch} i={idx++} t={t} />
+            ))}
+          </span>
+          {wi < words.length - 1 && " "}
+        </React.Fragment>
+      ))}
+      <svg viewBox="0 0 300 20" preserveAspectRatio="none" className="absolute left-0 -bottom-[0.2em] w-full h-[0.36em] overflow-visible" aria-hidden>
+        <motion.path d={d} fill="none" style={{ stroke }} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
       </svg>
     </span>
   );
 }
 
 function SoftwareWords({ p }: { p: MotionValue<number> }) {
-  const clip = useTransform(
-    p,
-    (v) => `inset(0 ${100 - seg(v, 0.6, 0.86) * 100}% 0 0)`,
-  );
+  // Starts as a hollow outline; colour fills in behind a typing caret as the app is built.
+  const pct = useTransform(p, (v) => seg(v, 0.4, 0.86) * 100);
+  const clip = useTransform(pct, (x) => `inset(-0.2em ${100 - x}% -0.2em 0)`);
+  const caretLeft = useTransform(pct, (x) => `${x}%`);
+  const caretOpacity = useTransform(p, (v) => (v > 0.39 && v < 0.9 ? 1 : 0));
   return (
     <span className="relative inline-block whitespace-nowrap">
-      <span className="text-[#2b3650]">working software.</span>
+      <span className="text-transparent [-webkit-text-stroke:1.2px_rgba(148,163,199,0.35)]">working software.</span>
       <motion.span
-        className="absolute inset-0 bg-gradient-to-r from-neon via-accent-soft to-emerald-300 bg-clip-text text-transparent"
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-neon via-accent-soft to-emerald-300 bg-clip-text text-transparent [filter:drop-shadow(0_0_18px_rgba(56,189,248,0.35))]"
         style={{ clipPath: clip }}
       >
         working software.
       </motion.span>
+      <motion.span
+        aria-hidden
+        className="absolute top-[0.1em] bottom-[0.06em] w-[0.08em] -ml-[0.04em] rounded-full bg-neon shadow-[0_0_14px_rgba(34,211,238,0.9)]"
+        style={{ left: caretLeft, opacity: caretOpacity }}
+      />
     </span>
+  );
+}
+
+/* ---------------- ship moment: sparkle burst + notifications ---------------- */
+
+function BurstDot({ p, k, at }: { p: MotionValue<number>; k: number; at: { x: number; y: number } }) {
+  const a = (k / 10) * Math.PI * 2;
+  const b = useTransform(p, (v) => seg(v, 0.785, 0.85));
+  const x = useTransform(b, (t) => Math.cos(a) * t * 70);
+  const y = useTransform(b, (t) => Math.sin(a) * t * 46);
+  const opacity = useTransform(b, (t) => (t > 0 && t < 1 ? 1 - t : 0));
+  return (
+    <motion.span
+      className="absolute w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full"
+      style={{ left: `${at.x}%`, top: `${at.y}%`, x, y, opacity, z: 30, background: k % 2 ? "#34D399" : "#A5F3FC", boxShadow: "0 0 8px currentColor" }}
+    />
+  );
+}
+
+function Toast({ p, at, top, right, icon: Icon, c, title, sub }: { p: MotionValue<number>; at: number; top: string; right: string; icon: LucideIcon; c: string; title: string; sub: string }) {
+  const t = useTransform(p, (v) => easeBack(seg(v, at, at + 0.035)));
+  const x = useTransform(t, (u) => (1 - u) * 40);
+  const opacity = useTransform(p, (v) => seg(v, at, at + 0.02));
+  return (
+    <motion.div
+      className="absolute flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0d1426]/95 backdrop-blur px-3 py-2 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.9)]"
+      style={{ top, right, x, opacity, z: 30 }}
+    >
+      <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${c}26` }}>
+        <Icon className="w-4 h-4" style={{ color: c }} />
+      </span>
+      <span className="leading-tight">
+        <span className="block text-[12px] font-semibold text-bone whitespace-nowrap">{title}</span>
+        <span className="block text-[10.5px] text-faint whitespace-nowrap">{sub}</span>
+      </span>
+    </motion.div>
   );
 }
 
 /* ---------------- the stage ---------------- */
 
-function Stage({
-  p,
-  wide,
-  size,
-}: {
-  p: MotionValue<number>;
-  wide: boolean;
-  size: { w: number; h: number };
-}) {
+function Stage({ p, wide, size }: { p: MotionValue<number>; wide: boolean; size: { w: number; h: number } }) {
   const F = wide ? FRAME.wide : FRAME.tall;
   const U = (v: number) => smooth(seg(v, 0.08, 0.34));
 
@@ -721,21 +766,24 @@ function Stage({
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 80, damping: 18 });
   const sy = useSpring(my, { stiffness: 80, damping: 18 });
-  const rotateX = useTransform(
-    [p, sy] as MotionValue[],
-    ([v, y]: number[]) => lerp(wide ? 52 : 40, 0, U(v)) + y * 4,
-  );
+  const rotateX = useTransform([p, sy] as MotionValue[], ([v, y]: number[]) => lerp(wide ? 52 : 40, 0, U(v)) + y * 4);
   const rotateY = useTransform(sx, (x) => x * 5);
   const rotateZ = useTransform(p, (v) => lerp(wide ? -14 : -8, 0, U(v)));
-  const scale = useTransform(p, (v) => lerp(wide ? 0.9 : 0.9, 1, U(v)));
+  const scale = useTransform(p, (v) => lerp(0.9, 1, U(v)));
 
-  const deskOpacity = useTransform(p, (v) => 1 - seg(v, 0.3, 0.62));
-  const planOpacity = useTransform(
-    p,
-    (v) => seg(v, 0.13, 0.26) * (1 - seg(v, 0.5, 0.66)),
-  );
-  const chrome = useTransform(p, (v) => smooth(seg(v, 0.64, 0.76)));
-  const chromeScale = useTransform(chrome, (c) => lerp(1.05, 1, c));
+  // Untangle: dashed plan slots glow on the desk, then a light beam sweeps the wood into a blueprint.
+  const slots = useTransform(p, (v) => seg(v, 0.12, 0.24) * (1 - seg(v, 0.52, 0.64)));
+  const scan = useTransform(p, (v) => smooth(seg(v, 0.24, 0.42)) * 100);
+  const deskClip = useTransform(scan, (x) => `inset(0 0 0 ${x}%)`);
+  const beamLeft = useTransform(scan, (x) => `${x}%`);
+  const beamOpacity = useTransform(scan, (x) => (x > 0.5 && x < 99.5 ? 1 : 0));
+  const grid = useTransform(p, (v) => seg(v, 0.24, 0.3) * (1 - seg(v, 0.58, 0.7)));
+  // Ship: the app window assembles around the pieces, then goes live.
+  const chrome = useTransform(p, (v) => smooth(seg(v, 0.62, 0.74)));
+  const barY = useTransform(chrome, (c) => `${(1 - c) * -110}%`);
+  const sideX = useTransform(chrome, (c) => `${(1 - c) * -110}%`);
+  const frameBg = useTransform(chrome, (c) => `rgba(7,11,22,${c * 0.95})`);
+  const frameBorder = useTransform(chrome, (c) => `rgba(148,163,199,${c * 0.22})`);
   const clicked = useTransform(p, (v) => seg(v, 0.775, 0.79));
   const deploy = useTransform(clicked, (c) => 1 - c);
   const pulse = useTransform(p, (v) => seg(v, 0.78, 0.9));
@@ -745,27 +793,13 @@ function Stage({
     const g = seg(v, 0.78, 0.84);
     return `0 0 0 1px rgba(52,211,153,${0.15 + g * 0.35}), 0 40px 120px -30px rgba(52,211,153,${g * 0.55})`;
   });
-  const url = useTransform(
-    p,
-    (v) => `inset(0 ${100 - seg(v, 0.68, 0.76) * 100}% 0 0)`,
-  );
+  const url = useTransform(p, (v) => `inset(0 ${100 - seg(v, 0.68, 0.76) * 100}% 0 0)`);
   // A cursor glides in and presses "Deploy".
-  const cx = useTransform(
-    p,
-    (v) => `${lerp(70, F.x + F.w - 7, smooth(seg(v, 0.7, 0.775)))}%`,
-  );
-  const cy = useTransform(
-    p,
-    (v) =>
-      `${lerp(wide ? 70 : 60, F.y + F.bar / 2 + 1, smooth(seg(v, 0.7, 0.775)))}%`,
-  );
-  const cursorOpacity = useTransform(
-    p,
-    (v) => seg(v, 0.69, 0.71) * (1 - seg(v, 0.84, 0.88)),
-  );
-  const cursorScale = useTransform(p, (v) =>
-    v > 0.772 && v < 0.79 ? 0.82 : 1,
-  );
+  const btn = { x: F.x + F.w - 7, y: F.y + F.bar / 2 + 1 };
+  const cx = useTransform(p, (v) => `${lerp(70, btn.x, smooth(seg(v, 0.7, 0.775)))}%`);
+  const cy = useTransform(p, (v) => `${lerp(wide ? 70 : 60, btn.y, smooth(seg(v, 0.7, 0.775)))}%`);
+  const cursorOpacity = useTransform(p, (v) => seg(v, 0.69, 0.71) * (1 - seg(v, 0.84, 0.88)));
+  const cursorScale = useTransform(p, (v) => (v > 0.772 && v < 0.79 ? 0.82 : 1));
 
   const onMove = (e: React.PointerEvent) => {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -780,193 +814,152 @@ function Stage({
       onPointerMove={onMove}
       onPointerLeave={() => (mx.set(0), my.set(0))}
     >
-      <motion.div
-        className="absolute inset-0"
-        style={{
-          rotateX,
-          rotateY,
-          rotateZ,
-          scale,
-          transformStyle: "preserve-3d",
-        }}
-      >
+      <motion.div className="absolute inset-0" style={{ rotateX, rotateY, rotateZ, scale, transformStyle: "preserve-3d" }}>
+        {/* Blueprint underneath the desk, revealed by the scan */}
+        <motion.div className="absolute inset-[1%] rounded-[2.2cqmin] grid-bg bg-[#071225]" style={{ opacity: grid, z: -7 }} />
         {/* The desk */}
         <motion.div
           className="absolute inset-[1%] rounded-[2.2cqmin] [container-type:size]"
           style={{
-            opacity: deskOpacity,
+            clipPath: deskClip,
             z: -6,
             background:
               "radial-gradient(80% 70% at 30% 20%, rgba(255,214,170,0.10), transparent 60%), repeating-linear-gradient(100deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 9px), linear-gradient(135deg,#3a2718,#22160e 60%,#1a110b)",
-            boxShadow:
-              "0 50px 80px -30px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.05)",
+            boxShadow: "0 50px 80px -30px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.05)",
           }}
         />
-        {/* The plan: blueprint grid + dashed slots */}
-        <motion.div
-          className="absolute inset-0"
-          style={{ opacity: planOpacity, z: -3 }}
-        >
-          <div className="absolute inset-[1%] rounded-xl grid-bg opacity-70" />
+        {/* The scan beam */}
+        <motion.span
+          className="absolute top-[1%] bottom-[1%] w-[3px] -ml-[1.5px] rounded-full bg-gradient-to-b from-transparent via-neon to-transparent shadow-[0_0_24px_6px_rgba(34,211,238,0.55)]"
+          style={{ left: beamLeft, opacity: beamOpacity, z: -4 }}
+        />
+        {/* The plan: dashed slots */}
+        <motion.div className="absolute inset-0" style={{ opacity: slots, z: -3 }}>
           {ITEMS.map((it) => {
-            const s = wide ? it.slot.wide : it.slot.tall;
+            const sl = wide ? it.slot.wide : it.slot.tall;
             return (
               <span
                 key={it.id}
-                className="absolute rounded-xl border border-dashed border-neon/60 bg-neon/[0.04]"
-                style={{
-                  left: `${s.x - s.w / 2}%`,
-                  top: `${s.y - s.h / 2}%`,
-                  width: `${s.w}%`,
-                  height: `${s.h}%`,
-                }}
+                className="absolute rounded-xl border border-dashed border-neon/60 bg-neon/[0.05] shadow-[inset_0_0_24px_rgba(34,211,238,0.08)]"
+                style={{ left: `${sl.x - sl.w / 2}%`, top: `${sl.y - sl.h / 2}%`, width: `${sl.w}%`, height: `${sl.h}%` }}
               />
             );
           })}
         </motion.div>
-        {/* The app frame */}
+        {/* The app frame: the top bar slides down and the sidebar slides in */}
         <motion.div
-          className="absolute rounded-2xl bg-[#070b16]/95 border border-line-strong overflow-hidden"
-          style={{
-            left: `${F.x}%`,
-            top: `${F.y}%`,
-            width: `${F.w}%`,
-            height: `${F.h}%`,
-            opacity: chrome,
-            scale: chromeScale,
-            z: -2,
-            boxShadow: glow,
-          }}
+          className="absolute rounded-2xl border overflow-hidden"
+          style={{ left: `${F.x}%`, top: `${F.y}%`, width: `${F.w}%`, height: `${F.h}%`, background: frameBg, borderColor: frameBorder, z: -2, boxShadow: glow }}
         >
-          <div
-            className="absolute inset-x-0 top-0 flex items-center gap-2 px-3 border-b border-line bg-panel/60"
-            style={{ height: `${(F.bar / F.h) * 100}%` }}
+          <motion.div
+            className="absolute inset-x-0 top-0 flex items-center gap-2 px-3 border-b border-line bg-panel/80"
+            style={{ height: `${(F.bar / F.h) * 100}%`, y: barY }}
           >
             <span className="w-2 h-2 rounded-full bg-red-400/70" />
             <span className="w-2 h-2 rounded-full bg-amber-300/70" />
             <span className="w-2 h-2 rounded-full bg-emerald-400/70" />
             <span className="ml-2 flex-1 max-w-[260px] h-[62%] rounded-md bg-void/70 border border-line flex items-center gap-1.5 px-2 overflow-hidden">
               <Lock className="w-3 h-3 shrink-0 text-emerald-300" />
-              <motion.span
-                className="font-mono text-[10px] sm:text-[11px] text-dim whitespace-nowrap"
-                style={{ clipPath: url }}
-              >
+              <motion.span className="font-mono text-[10px] sm:text-[11px] text-dim whitespace-nowrap" style={{ clipPath: url }}>
                 yourbusiness.app
               </motion.span>
             </span>
             <span className="relative ml-auto h-[62%] min-w-[64px] sm:min-w-[74px]">
-              <motion.span
-                style={{ opacity: deploy }}
-                className="absolute inset-0 rounded-md bg-accent text-white text-[10px] sm:text-[11px] font-semibold flex items-center justify-center"
-              >
+              <motion.span style={{ opacity: deploy }} className="absolute inset-0 rounded-md bg-accent text-white text-[10px] sm:text-[11px] font-semibold flex items-center justify-center">
                 Deploy
               </motion.span>
               <motion.span
                 style={{ opacity: clicked }}
                 className="absolute inset-0 rounded-md bg-emerald-400/15 border border-emerald-400/50 text-emerald-300 text-[10px] sm:text-[11px] font-semibold flex items-center justify-center gap-1.5"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />{" "}
-                Live
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
               </motion.span>
             </span>
-          </div>
+          </motion.div>
           {F.side > 0 && (
-            <div
-              className="absolute left-0 bottom-0 border-r border-line flex flex-col items-center gap-3 pt-4"
-              style={{
-                top: `${(F.bar / F.h) * 100}%`,
-                width: `${(F.side / F.w) * 100}%`,
-              }}
+            <motion.div
+              className="absolute left-0 bottom-0 border-r border-line flex flex-col items-center gap-3 pt-4 bg-panel/40"
+              style={{ top: `${(F.bar / F.h) * 100}%`, width: `${(F.side / F.w) * 100}%`, x: sideX }}
             >
               <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-accent to-neon" />
               {[0, 1, 2, 3].map((i) => (
-                <span
-                  key={i}
-                  className={`w-5 h-5 rounded-md ${i === 0 ? "bg-accent/30" : "bg-panel-2"}`}
-                />
+                <span key={i} className={`w-5 h-5 rounded-md ${i === 0 ? "bg-accent/30" : "bg-panel-2"}`} />
               ))}
-            </div>
+            </motion.div>
           )}
         </motion.div>
         <motion.span
           className="pointer-events-none absolute rounded-2xl border-2 border-emerald-300"
-          style={{
-            left: `${F.x}%`,
-            top: `${F.y}%`,
-            width: `${F.w}%`,
-            height: `${F.h}%`,
-            scale: pulseScale,
-            opacity: pulseOpacity,
-          }}
+          style={{ left: `${F.x}%`, top: `${F.y}%`, width: `${F.w}%`, height: `${F.h}%`, scale: pulseScale, opacity: pulseOpacity }}
         />
 
         {ITEMS.map((it, i) => (
           <Card key={it.id} p={p} item={it} i={i} wide={wide} />
         ))}
 
+        {Array.from({ length: 10 }, (_, k) => (
+          <BurstDot key={k} p={p} k={k} at={btn} />
+        ))}
+        <Toast p={p} at={0.84} top={wide ? "14%" : "13.5%"} right={`${100 - F.x - F.w + 2}%`} icon={CalendarDays} c="#34D399" title="Booking confirmed" sub="Court 2 · 7:00 PM" />
+        <Toast p={p} at={0.875} top={wide ? "25%" : "21.5%"} right={`${100 - F.x - F.w + 2}%`} icon={CircleDollarSign} c="#FBBF24" title="₹1,240 received" sub="Invoice paid automatically" />
+
         <motion.svg
           viewBox="0 0 24 24"
           className="absolute w-6 h-6 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
-          style={{
-            left: cx,
-            top: cy,
-            opacity: cursorOpacity,
-            scale: cursorScale,
-            z: 120,
-          }}
+          style={{ left: cx, top: cy, opacity: cursorOpacity, scale: cursorScale, z: 40 }}
         >
-          <path
-            d="M4 2 L4 19 L8.5 14.8 L11.6 21.5 L14.4 20.2 L11.3 13.6 L17.5 13.4 Z"
-            fill="#fff"
-            stroke="#0b1020"
-            strokeWidth="1.2"
-            strokeLinejoin="round"
-          />
+          <path d="M4 2 L4 19 L8.5 14.8 L11.6 21.5 L14.4 20.2 L11.3 13.6 L17.5 13.4 Z" fill="#fff" stroke="#0b1020" strokeWidth="1.2" strokeLinejoin="round" />
         </motion.svg>
       </motion.div>
     </div>
   );
 }
 
-function Steps({ p }: { p: MotionValue<number> }) {
-  const [active, setActive] = useState(0);
-  useMotionValueEvent(p, "change", (v) => {
-    const a = STEPS.reduce((acc, s, i) => (v >= s.at ? i : acc), 0);
-    setActive((prev) => (prev === a ? prev : a));
-  });
-  const fill = useTransform(p, (v) => seg(v, 0, 0.84));
+/* ---------------- step tracker + caption ---------------- */
+
+function StepSegment({ p, i, active }: { p: MotionValue<number>; i: number; active: number }) {
+  const s = STEPS[i];
+  const fill = useTransform(p, (v) => seg(v, s.at, s.end));
+  const on = i === active;
   return (
-    <div className="mx-auto w-full max-w-[520px] pr-12 sm:pr-0">
-      <div className="relative">
-        <div className="absolute left-[12.5%] right-[12.5%] top-[5px] h-px bg-line-strong">
-          <motion.div
-            className="absolute inset-0 origin-left bg-gradient-to-r from-orange-400 via-accent to-emerald-400"
-            style={{ scaleX: fill }}
-          />
-        </div>
-        <div className="relative grid grid-cols-4">
-          {STEPS.map((s, i) => {
-            const c = i === 0 ? "#FB923C" : i === 3 ? "#34D399" : "#60A5FA";
-            return (
-              <div key={s.label} className="flex flex-col items-center gap-2">
-                <span
-                  className="w-[11px] h-[11px] rounded-full border-2 transition-all duration-300"
-                  style={{
-                    borderColor: i <= active ? c : "rgba(148,163,199,0.3)",
-                    background: i === active ? c : "#070a12",
-                    boxShadow: i === active ? `0 0 12px ${c}` : "none",
-                  }}
-                />
-                <span
-                  className={`font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-colors duration-300 ${i === active ? "text-bone" : "text-faint"}`}
-                >
-                  {s.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+    <div className="min-w-0">
+      <div className={`flex items-baseline gap-1 sm:gap-1.5 font-mono text-[9.5px] sm:text-[11px] uppercase tracking-[0.06em] sm:tracking-[0.18em] transition-colors duration-300 ${on ? "text-bone" : i < active ? "text-dim" : "text-faint"}`}>
+        <span style={{ color: i <= active ? s.c : undefined }}>0{i + 1}</span>
+        <span className="whitespace-nowrap">{s.label}</span>
       </div>
+      <div className="mt-2 h-[3px] rounded-full bg-white/[0.08] overflow-hidden">
+        <motion.div className="h-full origin-left rounded-full" style={{ scaleX: fill, background: s.c, boxShadow: `0 0 10px ${s.c}` }} />
+      </div>
+    </div>
+  );
+}
+
+const capWords = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.035 } },
+  exit: { transition: { staggerChildren: 0.015 } },
+};
+const capWord = {
+  hidden: { y: "110%" },
+  show: { y: "0%", transition: { duration: 0.55, ease: EASE } },
+  exit: { y: "-110%", transition: { duration: 0.3, ease: EASE } },
+};
+
+function Caption({ active }: { active: number }) {
+  const s = STEPS[active];
+  return (
+    <div className="relative min-h-[3.2em] sm:min-h-[1.6em] font-grotesk text-[1.05rem] sm:text-[1.45rem] font-medium leading-[1.35] tracking-[-0.01em] text-bone/90">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.p key={active} variants={capWords} initial="hidden" animate="show" exit="exit" className="absolute inset-x-0 top-0">
+          {s.line.split(" ").map((w, k) => (
+            <span key={k} className="inline-block overflow-hidden align-bottom pb-[0.08em]">
+              <motion.span variants={capWord} className="inline-block" style={k === 0 ? { color: s.c } : undefined}>
+                {w}&nbsp;
+              </motion.span>
+            </span>
+          ))}
+        </motion.p>
+      </AnimatePresence>
     </div>
   );
 }
@@ -974,12 +967,16 @@ function Steps({ p }: { p: MotionValue<number> }) {
 export function ProblemFlip() {
   const track = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: p } = useScroll({
-    target: track,
-    offset: ["start start", "end end"],
-  });
+  const { scrollYProgress } = useScroll({ target: track, offset: ["start start", "end end"] });
+  // A light spring on top of the scroll, so the scene glides rather than steps.
+  const p = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4, restDelta: 0.0005 });
   const [wide, setWide] = useState(true);
   const [size, setSize] = useState({ w: 0, h: 0 });
+  const [active, setActive] = useState(0);
+  useMotionValueEvent(p, "change", (v) => {
+    const a = STEPS.reduce((acc, s, i) => (v >= s.at ? i : acc), 0);
+    setActive((prev) => (prev === a ? prev : a));
+  });
 
   useEffect(() => {
     const el = box.current;
@@ -1002,20 +999,11 @@ export function ProblemFlip() {
 
   return (
     <section id="approach" className="relative border-t border-line">
-      <div ref={track} className="relative h-[420vh]">
+      <div ref={track} className="relative h-[440vh]">
         <div className="sticky top-0 h-[100svh] overflow-hidden">
-          <motion.div
-            style={{ opacity: warm }}
-            className="pointer-events-none absolute -top-40 left-[10%] w-[700px] h-[520px] rounded-full bg-orange-500/[0.13] blur-[120px]"
-          />
-          <motion.div
-            style={{ opacity: cool }}
-            className="pointer-events-none absolute bottom-[-10%] right-[5%] w-[760px] h-[560px] rounded-full bg-emerald-400/[0.12] blur-[130px]"
-          />
-          <motion.div
-            style={{ opacity: cool }}
-            className="pointer-events-none absolute top-[20%] left-[30%] w-[600px] h-[420px] rounded-full bg-accent/[0.10] blur-[120px]"
-          />
+          <motion.div style={{ opacity: warm }} className="pointer-events-none absolute -top-40 left-[10%] w-[700px] h-[520px] rounded-full bg-orange-500/[0.13] blur-[120px]" />
+          <motion.div style={{ opacity: cool }} className="pointer-events-none absolute bottom-[-10%] right-[5%] w-[760px] h-[560px] rounded-full bg-emerald-400/[0.12] blur-[130px]" />
+          <motion.div style={{ opacity: cool }} className="pointer-events-none absolute top-[20%] left-[30%] w-[600px] h-[420px] rounded-full bg-accent/[0.10] blur-[120px]" />
 
           <div className="relative h-full w-full max-w-[1240px] mx-auto px-5 sm:px-10 pt-20 sm:pt-24 pb-5 sm:pb-7 flex flex-col">
             <div className="flex items-center gap-3">
@@ -1023,20 +1011,29 @@ export function ProblemFlip() {
               <span className="h-px w-10 bg-gradient-to-r from-accent to-neon" />
               <span className="eyebrow !text-faint">What I do</span>
             </div>
-            <h2 className="mt-3 font-semibold text-[1.75rem] sm:text-5xl leading-[1.12] tracking-tight text-bone text-balance">
-              I turn <ProblemWords p={p} /> into <SoftwareWords p={p} />
+            <h2 className="mt-3 font-grotesk font-bold text-[1.85rem] sm:text-[clamp(2.4rem,4.3vw,3.6rem)] leading-[1.06] tracking-[-0.035em] text-bone">
+              <span className="block">
+                <span className="font-medium text-bone/60">I turn</span> <ProblemWords p={p} />
+              </span>
+              <span className="block">
+                <span className="font-medium text-bone/60">into</span> <SoftwareWords p={p} />
+              </span>
             </h2>
 
-            <div
-              ref={box}
-              className="relative flex-1 min-h-0 my-4 sm:my-6 flex items-center justify-center"
-            >
-              {size.w > 0 && (
-                <Stage key={wide ? "w" : "t"} p={p} wide={wide} size={size} />
-              )}
+            <div ref={box} className="relative flex-1 min-h-0 my-3 sm:my-5 flex items-center justify-center">
+              {size.w > 0 && <Stage key={wide ? "w" : "t"} p={p} wide={wide} size={size} />}
             </div>
 
-            <Steps p={p} />
+            <div className="grid md:grid-cols-[1fr_minmax(0,520px)] items-end gap-3 md:gap-10">
+              <div className="pr-12 md:pr-0">
+                <Caption active={active} />
+              </div>
+              <div className="order-first md:order-none grid grid-cols-4 gap-2.5 sm:gap-3">
+                {STEPS.map((s, i) => (
+                  <StepSegment key={s.label} p={p} i={i} active={active} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

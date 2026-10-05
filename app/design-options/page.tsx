@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IntroOptions } from "@/components/options/IntroOptions";
+import { IntroOptions2 } from "@/components/options/IntroOptions2";
 import { WhatIDoBento } from "@/components/options/WhatIDoBento";
 import { WhatIDoSlider } from "@/components/options/WhatIDoSlider";
 import { WhatIDoEditorial } from "@/components/options/WhatIDoEditorial";
@@ -12,6 +13,7 @@ export const metadata: Metadata = { title: "Design options", robots: { index: fa
 
 const OPTIONS = [
   { id: "opt-1", label: "About intro · text options", C: IntroOptions },
+  { id: "opt-1x", label: "About intro · dev-tool ideas", C: IntroOptions2 },
   { id: "opt-2a", label: "What I do · Option A — Capability bento", C: WhatIDoBento },
   { id: "opt-2b", label: "What I do · Option B — Drag to transform", C: WhatIDoSlider },
   { id: "opt-2c", label: "What I do · Option C — Editorial statement", C: WhatIDoEditorial },

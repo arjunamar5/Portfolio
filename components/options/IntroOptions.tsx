@@ -9,7 +9,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const { location } = PORTFOLIO_DATA.personal;
 
 /** Same shell as the About intro tile, so options can be judged in place. */
-function Shell({ label, children }: { label: string; children: React.ReactNode }) {
+export function Shell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-accent-soft">{label}</div>
@@ -22,7 +22,7 @@ function Shell({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Chips() {
+export function Chips() {
   return (
     <div className="mt-auto flex flex-wrap gap-2 pt-6">
       <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur px-3 py-1.5 text-[12.5px] text-white">

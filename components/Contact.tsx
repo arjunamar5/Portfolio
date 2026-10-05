@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import React, { useCallback, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Mail, FileText, Check, MapPin, ArrowUpRight } from "lucide-react";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import { PORTFOLIO_DATA } from "@/data/portfolio-data";
@@ -10,7 +10,6 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 type Key = {
   id: string;
-  hotkey: string;
   label: string;
   hint: string;
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
@@ -18,10 +17,10 @@ type Key = {
 };
 
 const KEYS: Key[] = [
-  { id: "email", hotkey: "E", label: "Email", hint: "copy address", icon: Mail, c: "#22D3EE" },
-  { id: "linkedin", hotkey: "L", label: "LinkedIn", hint: "connect", icon: FaLinkedinIn, c: "#3B82F6" },
-  { id: "github", hotkey: "G", label: "GitHub", hint: "@arjunamar5", icon: FaGithub, c: "#C084FC" },
-  { id: "resume", hotkey: "R", label: "Résumé", hint: "view pdf", icon: FileText, c: "#34D399" },
+  { id: "email", label: "Email", hint: "copy address", icon: Mail, c: "#22D3EE" },
+  { id: "linkedin", label: "LinkedIn", hint: "connect", icon: FaLinkedinIn, c: "#3B82F6" },
+  { id: "github", label: "GitHub", hint: "@arjunamar5", icon: FaGithub, c: "#C084FC" },
+  { id: "resume", label: "Résumé", hint: "view pdf", icon: FileText, c: "#34D399" },
 ];
 
 /** One mechanical keycap: lifts on hover, sinks when pressed, glows in its colour. */
@@ -61,7 +60,6 @@ function Keycap({ k, pressed, done, onPress }: { k: Key; pressed: boolean; done:
         }}
       >
         <span className="flex items-start justify-between">
-          <span className="font-mono text-[11px] font-semibold text-white/40 hidden md:block">{k.hotkey}</span>
           <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: k.c, boxShadow: `0 0 8px 2px ${k.c}` }} />
         </span>
         <span
@@ -85,8 +83,6 @@ function Keycap({ k, pressed, done, onPress }: { k: Key; pressed: boolean; done:
 
 export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
   const { email, linkedin, github, location } = PORTFOLIO_DATA.personal;
-  const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { amount: 0.35 });
   const [pressed, setPressed] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -109,22 +105,9 @@ export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
     [email, linkedin, github, onOpenResume]
   );
 
-  // Real keyboard shortcuts while the section is on screen.
-  useEffect(() => {
-    if (!inView) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const t = e.target as HTMLElement;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
-      const k = KEYS.find((x) => x.hotkey.toLowerCase() === e.key.toLowerCase());
-      if (k) act(k.id);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [inView, act]);
 
   return (
-    <section ref={ref} id="contact" className="relative py-28 sm:py-36 border-t border-line overflow-hidden">
+    <section id="contact" className="relative py-28 sm:py-36 border-t border-line overflow-hidden">
       <div className="pointer-events-none absolute inset-0 dot-grid [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,black,transparent)]" />
       <div className="aurora-blob w-[620px] h-[460px] top-0 left-1/2 -ml-[310px] bg-accent/15" />
       <div className="aurora-blob w-[420px] h-[320px] bottom-0 right-[10%] bg-fuchsia-500/10" style={{ animationDelay: "-8s" }} />
@@ -149,15 +132,6 @@ export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
             <span className="bg-gradient-to-r from-neon via-accent-soft to-fuchsia-300 bg-clip-text text-transparent">together.</span>
           </span>
         </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.15, ease: EASE }}
-          className="mt-5 text-dim max-w-[520px] mx-auto"
-        >
-          Open to full-time roles and freelance projects. Pick a key.
-        </motion.p>
 
         {/* the keyboard */}
         <motion.div
@@ -165,7 +139,7 @@ export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
           whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 1, ease: EASE }}
-          className="relative mt-14 mx-auto max-w-[760px] [perspective:1200px]"
+          className="relative mt-12 mx-auto max-w-[760px] [perspective:1200px]"
         >
           {/* RGB underglow */}
           <div className="kbd-glow pointer-events-none absolute -inset-3 rounded-[40px] blur-2xl opacity-70" />
@@ -194,17 +168,7 @@ export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
                   open mail app <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
               </motion.div>
-            ) : (
-              <motion.div key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="hidden md:inline-flex items-center gap-2 font-mono text-[11px] text-faint">
-                or press
-                {KEYS.map((k) => (
-                  <kbd key={k.id} className="rounded-md border border-white/15 bg-white/[0.04] px-1.5 py-0.5 text-white/70 shadow-[0_2px_0_rgba(255,255,255,0.08)]">
-                    {k.hotkey}
-                  </kbd>
-                ))}
-                on your keyboard
-              </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
 

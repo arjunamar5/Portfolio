@@ -1,9 +1,4 @@
 import type { Metadata } from "next";
-import { AboutBento } from "@/components/options/AboutBento";
-import { AboutWrapped } from "@/components/options/AboutWrapped";
-import { AboutBadge } from "@/components/options/AboutBadge";
-import { AboutStatement } from "@/components/options/AboutStatement";
-import { AboutParticles } from "@/components/options/AboutParticles";
 import { WhatIDoBento } from "@/components/options/WhatIDoBento";
 import { WhatIDoSlider } from "@/components/options/WhatIDoSlider";
 import { WhatIDoEditorial } from "@/components/options/WhatIDoEditorial";
@@ -15,11 +10,6 @@ import { ProjectsBento } from "@/components/options/ProjectsBento";
 export const metadata: Metadata = { title: "Design options", robots: { index: false, follow: false } };
 
 const OPTIONS = [
-  { id: "opt-1a", label: "About · Idea 1 — About bento", C: AboutBento },
-  { id: "opt-1b", label: "About · Idea 2 — Arjun, wrapped", C: AboutWrapped },
-  { id: "opt-1c", label: "About · Idea 3 — Lanyard badge", C: AboutBadge },
-  { id: "opt-1d", label: "About · Idea 4 — Interactive statement", C: AboutStatement },
-  { id: "opt-1e", label: "About · Idea 5 — Particle name", C: AboutParticles },
   { id: "opt-2a", label: "What I do · Option A — Capability bento", C: WhatIDoBento },
   { id: "opt-2b", label: "What I do · Option B — Drag to transform", C: WhatIDoSlider },
   { id: "opt-2c", label: "What I do · Option C — Editorial statement", C: WhatIDoEditorial },

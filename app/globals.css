@@ -414,3 +414,41 @@ body {
   mask-composite: exclude;
   animation: impact-spin 7s linear infinite;
 }
+
+/* About: slowly drifting colour mesh behind the intro tile. */
+@keyframes about-mesh {
+  0%,
+  100% {
+    background-position: 0% 0%, 100% 100%, 60% 0%;
+  }
+  50% {
+    background-position: 30% 40%, 60% 60%, 20% 30%;
+  }
+}
+.about-mesh {
+  background-image: radial-gradient(55% 65% at 15% 20%, rgba(59, 130, 246, 0.55), transparent 60%),
+    radial-gradient(50% 60% at 85% 80%, rgba(168, 85, 247, 0.5), transparent 60%),
+    radial-gradient(40% 50% at 60% 10%, rgba(34, 211, 238, 0.35), transparent 60%);
+  background-size: 160% 160%;
+  animation: about-mesh 14s ease-in-out infinite;
+}
+/* About: a signal travelling along the RAG pipeline. */
+@keyframes rag-travel {
+  0% {
+    left: 1.25rem;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 1.25rem);
+    opacity: 0;
+  }
+}
+.rag-dot {
+  animation: rag-travel 2.8s ease-in-out infinite;
+}

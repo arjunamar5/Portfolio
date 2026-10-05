@@ -18,7 +18,7 @@ const LIVE = ["project-3-cue-court-coffee", "project-2-perfect-study-space", "pr
 const ACADEMIC = ["project-1-brain-tumor-detection"];
 
 /** Illustrative animated template for each featured project. */
-function ProjectVisual({ project }: { project: ProjectCaseStudy }) {
+export function ProjectVisual({ project }: { project: ProjectCaseStudy }) {
   switch (project.visualType) {
     case "mri-viewer":
       return <MriVisual />;

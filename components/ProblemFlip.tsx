@@ -45,7 +45,7 @@ type Box = { x: number; y: number; w: number; h: number; r?: number };
 
 const fs = (n: number) => ({ fontSize: `${n}cqmin` });
 
-function StickyReal() {
+export function StickyReal() {
   return (
     <div
       className="absolute inset-0 rounded-[2px] shadow-[0_18px_30px_-14px_rgba(0,0,0,0.8)]"
@@ -73,7 +73,7 @@ function StickyReal() {
   );
 }
 
-function PhoneReal() {
+export function PhoneReal() {
   return (
     <div className="absolute inset-0 rounded-[16cqmin] bg-[#0d1117] border-[2px] border-[#2a3242] shadow-[0_18px_30px_-12px_rgba(0,0,0,0.85)]">
       <div className="absolute inset-[5%] rounded-[12cqmin] bg-gradient-to-b from-[#312e81] to-[#0f172a] flex flex-col items-center pt-[16%] gap-[4%] overflow-hidden">
@@ -102,7 +102,7 @@ function PhoneReal() {
   );
 }
 
-function SheetReal() {
+export function SheetReal() {
   return (
     <div
       className="absolute inset-0 rounded-[2px] overflow-hidden shadow-[0_18px_30px_-14px_rgba(0,0,0,0.8)]"
@@ -140,7 +140,7 @@ function SheetReal() {
   );
 }
 
-function NotebookReal() {
+export function NotebookReal() {
   return (
     <div
       className="absolute inset-0 rounded-[2px] overflow-hidden shadow-[0_18px_30px_-14px_rgba(0,0,0,0.8)]"
@@ -175,7 +175,7 @@ function NotebookReal() {
 
 const ZIGZAG = `polygon(0 0, 100% 0, ${Array.from({ length: 13 }, (_, i) => `${100 - i * 8.33}% ${i % 2 ? 100 : 96}%`).join(", ")})`;
 
-function ReceiptReal() {
+export function ReceiptReal() {
   return (
     <div
       className="absolute inset-0 drop-shadow-[0_14px_14px_rgba(0,0,0,0.6)]"
@@ -207,7 +207,7 @@ function ReceiptReal() {
   );
 }
 
-function ClockReal() {
+export function ClockReal() {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="relative w-[80%] aspect-square drop-shadow-[0_14px_14px_rgba(0,0,0,0.6)]">
@@ -287,7 +287,7 @@ function AppCard({
   );
 }
 
-function TasksApp() {
+export function TasksApp() {
   return (
     <AppCard icon={ListChecks} title="Follow-ups" accent="#34D399">
       <div className="flex-1 flex flex-col justify-evenly">
@@ -318,7 +318,7 @@ function TasksApp() {
   );
 }
 
-function ChatApp() {
+export function ChatApp() {
   return (
     <AppCard icon={Bot} title="Booking bot" accent="#60A5FA">
       <div
@@ -345,7 +345,7 @@ function ChatApp() {
   );
 }
 
-function ChartApp() {
+export function ChartApp() {
   return (
     <AppCard icon={TrendingUp} title="Revenue" accent="#34D399" chip="+24%">
       <svg
@@ -376,7 +376,7 @@ function ChartApp() {
   );
 }
 
-function CalendarApp() {
+export function CalendarApp() {
   const filled = [1, 2, 5, 7, 8, 10];
   return (
     <AppCard icon={CalendarDays} title="Bookings" accent="#818CF8">
@@ -403,7 +403,7 @@ function CalendarApp() {
   );
 }
 
-function InvoiceApp() {
+export function InvoiceApp() {
   return (
     <AppCard icon={Receipt} title="Invoice" accent="#FBBF24">
       <div className="relative flex-1 flex flex-col justify-evenly">
@@ -441,7 +441,7 @@ function InvoiceApp() {
   );
 }
 
-function RemindersApp() {
+export function RemindersApp() {
   return (
     <AppCard icon={Bell} title="Reminders" accent="#F472B6">
       <div

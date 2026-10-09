@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Mail, FileText, Check, MapPin, ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Mail, FileText, MapPin } from "lucide-react";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import { PORTFOLIO_DATA } from "@/data/portfolio-data";
 
@@ -17,17 +17,17 @@ type Key = {
 };
 
 const KEYS: Key[] = [
-  { id: "email", label: "Email", hint: "copy address", icon: Mail, c: "#22D3EE" },
+  { id: "email", label: "Email", hint: "write to me", icon: Mail, c: "#22D3EE" },
   { id: "linkedin", label: "LinkedIn", hint: "connect", icon: FaLinkedinIn, c: "#3B82F6" },
   { id: "github", label: "GitHub", hint: "@arjunamar5", icon: FaGithub, c: "#C084FC" },
   { id: "resume", label: "Résumé", hint: "view pdf", icon: FileText, c: "#34D399" },
 ];
 
 /** One mechanical keycap: lifts on hover, sinks when pressed, glows in its colour. */
-function Keycap({ k, pressed, done, onPress }: { k: Key; pressed: boolean; done: boolean; onPress: () => void }) {
+function Keycap({ k, pressed, onPress }: { k: Key; pressed: boolean; onPress: () => void }) {
   const [down, setDown] = useState(false);
   const isDown = down || pressed;
-  const Icon = done ? Check : k.icon;
+  const Icon = k.icon;
   return (
     <button
       onClick={onPress}
@@ -55,8 +55,8 @@ function Keycap({ k, pressed, done, onPress }: { k: Key; pressed: boolean; done:
         style={{
           transform: `translateY(${isDown ? 4 : "var(--lift)"})`,
           background: "radial-gradient(120% 90% at 30% 0%, rgba(255,255,255,0.08), transparent 55%), linear-gradient(180deg,#232c42,#141a2a)",
-          borderColor: isDown || done ? `${k.c}aa` : "rgba(255,255,255,0.10)",
-          boxShadow: isDown || done ? `inset 0 0 26px ${k.c}33, 0 0 0 1px ${k.c}55` : "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -10px 22px rgba(0,0,0,0.35)",
+          borderColor: isDown ? `${k.c}aa` : "rgba(255,255,255,0.10)",
+          boxShadow: isDown ? `inset 0 0 26px ${k.c}33, 0 0 0 1px ${k.c}55` : "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -10px 22px rgba(0,0,0,0.35)",
         }}
       >
         <span className="flex items-start justify-between">
@@ -64,7 +64,7 @@ function Keycap({ k, pressed, done, onPress }: { k: Key; pressed: boolean; done:
         </span>
         <Icon className="w-7 h-7 sm:w-8 sm:h-8 self-center transition-transform duration-300 group-hover:scale-110" style={{ color: k.c }} />
         <span>
-          <span className="block font-grotesk text-[15px] sm:text-base font-semibold text-white leading-tight">{done ? "Copied!" : k.label}</span>
+          <span className="block font-grotesk text-[15px] sm:text-base font-semibold text-white leading-tight">{k.label}</span>
           <span className="block font-mono text-[10.5px] sm:text-[11px] text-white/45 mt-0.5 truncate">{k.hint}</span>
         </span>
       </span>
@@ -75,21 +75,13 @@ function Keycap({ k, pressed, done, onPress }: { k: Key; pressed: boolean; done:
 export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
   const { email, linkedin, github, location } = PORTFOLIO_DATA.personal;
   const [pressed, setPressed] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const act = useCallback(
-    async (id: string) => {
+    (id: string) => {
       setPressed(id);
       setTimeout(() => setPressed(null), 160);
-      if (id === "email") {
-        try {
-          await navigator.clipboard.writeText(email);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 3200);
-        } catch {
-          window.location.href = `mailto:${email}`;
-        }
-      } else if (id === "linkedin") window.open(linkedin, "_blank", "noopener,noreferrer");
+      if (id === "email") window.location.href = `mailto:${email}`;
+      else if (id === "linkedin") window.open(linkedin, "_blank", "noopener,noreferrer");
       else if (id === "github") window.open(github, "_blank", "noopener,noreferrer");
       else onOpenResume();
     },
@@ -137,33 +129,13 @@ export function Contact({ onOpenResume }: { onOpenResume: () => void }) {
           <div className="relative rounded-[32px] p-3 sm:p-4 border border-white/10 bg-[linear-gradient(180deg,#121826,#0a0e18)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_40px_80px_-30px_rgba(0,0,0,0.9)]">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pb-2">
               {KEYS.map((k) => (
-                <Keycap key={k.id} k={k} pressed={pressed === k.id} done={k.id === "email" && copied} onPress={() => act(k.id)} />
+                <Keycap key={k.id} k={k} pressed={pressed === k.id} onPress={() => act(k.id)} />
               ))}
             </div>
           </div>
         </motion.div>
 
-        <div className="relative mt-6 h-6">
-          <AnimatePresence mode="wait">
-            {copied ? (
-              <motion.div
-                key="copied"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.3, ease: EASE }}
-                className="inline-flex items-center gap-2 text-sm text-emerald-300"
-              >
-                <Check className="w-4 h-4" /> Email copied, paste it anywhere ·
-                <a href={`mailto:${email}`} className="inline-flex items-center gap-1 text-bone hover:text-neon transition-colors">
-                  open mail app <ArrowUpRight className="w-3.5 h-3.5" />
-                </a>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
-
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-xs text-faint">
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-3 text-xs text-faint">
           <span className="inline-flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5" /> {location}
           </span>

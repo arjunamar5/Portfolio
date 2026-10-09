@@ -4,6 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "@fontsource-variable/space-grotesk";
 import "@fontsource-variable/plus-jakarta-sans";
 import "@fontsource-variable/caveat";
+import "@fontsource-variable/unbounded";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 

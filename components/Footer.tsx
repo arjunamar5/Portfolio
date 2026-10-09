@@ -18,7 +18,7 @@ export function Footer() {
   return (
     <footer className="relative bg-void border-t border-line py-10 overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 pt-8 pb-10 sm:pb-12">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 pt-8 pb-14 sm:pb-20">
         <Wordmark text="Arjun R Amarnath" />
       </div>
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10 flex justify-center">

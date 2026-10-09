@@ -18,11 +18,10 @@ export function Footer() {
   return (
     <footer className="relative bg-void border-t border-line py-10 overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
-      <div className="flex justify-center pt-6 pb-14 sm:pb-16">
+      <div className="flex justify-center pt-6 pb-10 sm:pb-12">
         <Signature />
       </div>
-      <div className="max-w-[1100px] mx-auto px-6 sm:px-10 flex flex-wrap items-center justify-between gap-6">
-        <div className="font-mono text-[11px] tracking-[0.18em] uppercase text-faint">© {new Date().getFullYear()}</div>
+      <div className="max-w-[1100px] mx-auto px-6 sm:px-10 flex justify-center">
         <div className="flex items-center gap-2">
           {[
             { href: `mailto:${email}`, icon: Mail, label: "Email" },

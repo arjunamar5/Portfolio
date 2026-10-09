@@ -6,7 +6,7 @@ import { motion, useInView } from "framer-motion";
 const EASE = [0.65, 0, 0.35, 1] as const;
 
 /** A handwritten "Arjun" that writes itself left to right, then gets a flourish underneath. */
-export function Signature() {
+export function Signature({ font = "font-hand font-semibold", size = "text-[4.5rem] sm:text-[6rem]", lh = "leading-[1.1]" }: { font?: string; size?: string; lh?: string } = {}) {
   // Watch the container: the clipped text itself never counts as "in view".
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
@@ -19,7 +19,7 @@ export function Signature() {
         animate={inView ? { clipPath: "inset(-30% -5% -30% -5%)" } : undefined}
         transition={{ duration: 1.8, ease: EASE }}
       >
-        <span className="block font-hand font-semibold leading-[1.1] text-[4.5rem] sm:text-[6rem] pr-3 bg-[linear-gradient(90deg,#00C6FF_0%,#3B82F6_28%,#8B5CF6_55%,#EC4899_80%,#FF6B6B_100%)] bg-clip-text text-transparent">
+        <span className={`block ${font} ${lh} ${size} px-3 bg-[linear-gradient(90deg,#00C6FF_0%,#3B82F6_28%,#8B5CF6_55%,#EC4899_80%,#FF6B6B_100%)] bg-clip-text text-transparent`}>
           Arjun
         </span>
       </motion.span>

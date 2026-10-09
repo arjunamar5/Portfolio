@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SignatureOptions } from "@/components/options/SignatureOptions";
 import { IntroSmall } from "@/components/options/IntroSmall";
 import { IntroOptions } from "@/components/options/IntroOptions";
 import { IntroOptions2 } from "@/components/options/IntroOptions2";
@@ -13,6 +14,7 @@ import { ProjectsBento } from "@/components/options/ProjectsBento";
 export const metadata: Metadata = { title: "Design options", robots: { index: false, follow: false } };
 
 const OPTIONS = [
+  { id: "opt-sig", label: "Signature styles", C: SignatureOptions },
   { id: "opt-1s", label: "About intro · small & neat", C: IntroSmall },
   { id: "opt-1", label: "About intro · text options", C: IntroOptions },
   { id: "opt-1x", label: "About intro · dev-tool ideas", C: IntroOptions2 },

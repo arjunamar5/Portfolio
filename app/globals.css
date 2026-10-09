@@ -483,21 +483,3 @@ body {
   background: conic-gradient(from var(--kbd-a), #22d3ee, #3b82f6, #a855f7, #f472b6, #34d399, #22d3ee);
   animation: kbd-spin 8s linear infinite;
 }
-/* Footer: a soft light sweep across the name. */
-@keyframes name-shine {
-  0% {
-    background-position: 120% 0;
-  }
-  60%,
-  100% {
-    background-position: -20% 0;
-  }
-}
-.name-shine {
-  background-image: linear-gradient(100deg, #f2f4f8 0%, #f2f4f8 38%, #67e8f9 46%, #a78bfa 52%, #f2f4f8 60%, #f2f4f8 100%);
-  background-size: 250% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: name-shine 5s ease-in-out infinite;
-}

@@ -14,12 +14,12 @@ export function Signature() {
     <div ref={ref} className="relative inline-block select-none" aria-label="Arjun, handwritten signature">
       <motion.span
         aria-hidden
-        className="block -rotate-[4deg] [filter:drop-shadow(0_0_18px_rgba(34,211,238,0.35))]"
+        className="block -rotate-[4deg] [filter:drop-shadow(0_0_18px_rgba(139,92,246,0.35))]"
         initial={{ clipPath: "inset(-30% 100% -30% -5%)" }}
         animate={inView ? { clipPath: "inset(-30% -5% -30% -5%)" } : undefined}
         transition={{ duration: 1.8, ease: EASE }}
       >
-        <span className="block font-hand font-semibold leading-[1.1] text-[4.5rem] sm:text-[6rem] pr-3 bg-gradient-to-r from-white via-neon to-fuchsia-300 bg-clip-text text-transparent">
+        <span className="block font-hand font-semibold leading-[1.1] text-[4.5rem] sm:text-[6rem] pr-3 bg-[linear-gradient(90deg,#00C6FF_0%,#3B82F6_28%,#8B5CF6_55%,#EC4899_80%,#FF6B6B_100%)] bg-clip-text text-transparent">
           Arjun
         </span>
       </motion.span>
@@ -27,9 +27,11 @@ export function Signature() {
       <svg viewBox="0 0 260 40" className="absolute left-[4%] -bottom-4 sm:-bottom-5 w-[95%] h-8 overflow-visible -rotate-[4deg]" aria-hidden>
         <defs>
           <linearGradient id="sig-grad" x1="0" x2="1">
-            <stop offset="0%" stopColor="#F2F4F8" />
-            <stop offset="55%" stopColor="#22D3EE" />
-            <stop offset="100%" stopColor="#F0ABFC" />
+            <stop offset="0%" stopColor="#00C6FF" />
+            <stop offset="30%" stopColor="#3B82F6" />
+            <stop offset="58%" stopColor="#8B5CF6" />
+            <stop offset="82%" stopColor="#EC4899" />
+            <stop offset="100%" stopColor="#FF6B6B" />
           </linearGradient>
         </defs>
         <motion.path

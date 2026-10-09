@@ -19,7 +19,7 @@ export function Footer() {
     <footer className="relative bg-void border-t border-line py-10 overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
       <div className="flex justify-center pt-6 pb-10 sm:pb-12">
-        <Signature />
+        <Signature text="Arjun R Amarnath" underline={false} font="[font-family:'Satisfy',cursive]" size="text-[2.3rem] sm:text-[4rem]" lh="leading-[1.4]" />
       </div>
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10 flex justify-center">
         <div className="flex items-center gap-2">

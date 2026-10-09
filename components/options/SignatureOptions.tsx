@@ -9,7 +9,8 @@ import "@fontsource/sacramento";
 import "@fontsource/satisfy";
 import { Signature } from "../Signature";
 
-const STYLES: { n: string; label: string; font: string; size?: string; lh?: string }[] = [
+// Earlier comparison of all seven styles.
+export const STYLES: { n: string; label: string; font: string; size?: string; lh?: string }[] = [
   { n: "1", label: "Current (Caveat)", font: "font-hand font-semibold" },
   { n: "2", label: "Elegant script (Great Vibes)", font: "[font-family:'Great_Vibes',cursive]", size: "text-[5rem] sm:text-[6.5rem]", lh: "leading-[1.3]" },
   { n: "3", label: "Pen signature (Mr Dafoe)", font: "[font-family:'Mr_Dafoe',cursive]", size: "text-[5rem] sm:text-[6.5rem]", lh: "leading-[1.3]" },
@@ -19,17 +20,20 @@ const STYLES: { n: string; label: string; font: string; size?: string; lh?: stri
   { n: "7", label: "Casual script (Satisfy)", font: "[font-family:'Satisfy',cursive]", size: "text-[4.2rem] sm:text-[5.4rem]", lh: "leading-[1.4]" },
 ];
 
+const FULL: { label: string; font: string; size: string; lh: string }[] = [
+  { label: "4 · Thin & airy (Sacramento)", font: "[font-family:'Sacramento',cursive]", size: "text-[2.5rem] sm:text-[5rem]", lh: "leading-[1.3]" },
+  { label: "7 · Casual script (Satisfy)", font: "[font-family:'Satisfy',cursive]", size: "text-[2.3rem] sm:text-[4rem]", lh: "leading-[1.4]" },
+];
+
 export function SignatureOptions() {
   return (
     <section className="py-16 bg-void">
-      <div className="max-w-[1240px] mx-auto px-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {STYLES.map((s) => (
-          <div key={s.n} className="rounded-3xl border border-line bg-[#070a12] p-6 flex flex-col items-center">
-            <div className="self-start font-mono text-[11px] uppercase tracking-[0.18em] text-accent-soft">
-              {s.n} · {s.label}
-            </div>
-            <div className="flex-1 flex items-center justify-center py-8 min-h-[190px]">
-              <Signature font={s.font} size={s.size} lh={s.lh} />
+      <div className="max-w-[1100px] mx-auto px-6 space-y-6">
+        {FULL.map((s) => (
+          <div key={s.label} className="rounded-3xl border border-line bg-[#070a12] p-6 flex flex-col items-center">
+            <div className="self-start font-mono text-[11px] uppercase tracking-[0.18em] text-accent-soft">{s.label} · full name, no underline</div>
+            <div className="flex items-center justify-center py-10 min-h-[200px]">
+              <Signature font={s.font} size={s.size} lh={s.lh} text="Arjun R Amarnath" underline={false} />
             </div>
           </div>
         ))}
